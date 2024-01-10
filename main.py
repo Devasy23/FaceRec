@@ -39,3 +39,8 @@ async def read_random_file():
     path = f"{IMAGEDIR}{files[random_index]}"
     
     return FileResponse(path)
+
+@app.delete("/delete/{filename}")
+async def delete_file(filename: str):
+    os.remove(f"{IMAGEDIR}/{filename}")
+    return {"message": "Face deleted successfully"}
