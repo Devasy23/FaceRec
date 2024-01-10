@@ -29,6 +29,11 @@ jobs:
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         uvicorn main:app --reload
+    - name: Start FastAPI server
+      run: |
+        uvicorn main:app --reload &
+        sleep 10  # Give FastAPI some time to start
+      shell: bash
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
