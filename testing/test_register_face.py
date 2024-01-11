@@ -1,14 +1,14 @@
 import pytest
 import requests
 from fastapi.testclient import TestClient
-from main import app
+from main.main import app
 import os
     
 client = TestClient(app)
 def test_register_face():
     # Open a test image file in binary mode
     IMAGEDIR = "test-faces/"
-    with open("test-faces/07c64ef1-b32e-4396-97ea-0894249d58ee.jpg", "rb") as image_file:
+    with open(".\\test-faces\\07c64ef1-b32e-4396-97ea-0894249d58ee.jpg", "rb") as image_file:
         # Create a tuple with the file's name and its content
         file_tuple = ("test_image.jpg", image_file.read())
         # Create a dictionary with the file's data
