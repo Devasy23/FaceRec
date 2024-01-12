@@ -24,7 +24,7 @@ async def register_face(file: UploadFile = File(...)):
     #save the file
     with open(f"{IMAGEDIR}{file.filename}", "wb") as f:
         f.write(contents)
-    db.images.insert_one({"filename": file.filename, "contents": contents})
+    # db.images.insert_one({"filename": file.filename, "contents": contents})
     return {"filename": file.filename}
 
 

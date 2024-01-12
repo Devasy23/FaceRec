@@ -3,7 +3,18 @@ import requests
 from fastapi.testclient import TestClient
 from main.main import app
 import os
-    
+from pymongo import MongoClient
+
+# def check_mongo_connection():
+#     client = MongoClient('localhost', 27017)
+#     try:
+#         # The ismaster command is cheap and does not require auth.
+#         client.admin.command('ismaster')
+#         print("MongoDB is running")
+#     except Exception as e:
+#         print("Could not connect to MongoDB: %s" % e)
+
+# check_mongo_connection()  
 client = TestClient(app)
 def test_register_face():
     # Open a test image file in binary mode
