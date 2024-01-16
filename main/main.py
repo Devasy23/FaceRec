@@ -1,9 +1,12 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import FileResponse
 import os
+from datetime import datetime
 from pymongo import MongoClient
 from random import randint
 import uuid
+from deepface import DeepFace
+from matplotlib import pyplot as plt
 
 IMAGEDIR = "test-faces/"
 
@@ -12,6 +15,7 @@ port = 8000
 client = MongoClient(mongodb_uri,port)
 
 db = client["ImageDB"]
+faceEntries = db["faceEntries"]
 
 app = FastAPI()
 
@@ -28,6 +32,41 @@ async def register_face(file: UploadFile = File(...)):
     return {"filename": file.filename}
 
 
+@app.post("/create_new_faceEntry")
+async def create_new_faceEntry(id:int, age: int, gender: str, image: UploadFile = File(...)):
+    # Generate a unique ID
+    # id = uuid.uuid4()
+
+    # Get the current time
+    time = datetime.now()
+
+    # Read the image file
+    image_data = await image.read()
+    print(image.filename)
+    # Save the original image in a specified directory
+    with open(f"../Images/dbImages/{image.filename}", "wb") as f:
+        f.write(image_data)
+
+    # Extract the face from the image
+    face_image_data = DeepFace.extract_faces(f"../Images/dbImages/{image.filename}", detector_backend="mtcnn")
+
+    # Save the face image in a specified directory
+    plt.imsave(f"../Images/Faces/{image.filename}", face_image_data[0]['face'])
+
+    # Calculate the embeddings of the face image
+    embeddings = DeepFace.represent(f"../Images/dbImages/{image.filename}", model_name="Facenet", detector_backend="mtcnn")
+
+    # Store the data in the database
+    db.faceEntries.insert_one({
+        "id": id,
+        "age": age,
+        "gender": gender,
+        "time": time,
+        "embeddings": embeddings,
+        # "face-img": face_image_data,
+    })
+
+    return {"message": "Face entry created successfully"}
 
 @app.get("/show/")
 async def read_random_file():

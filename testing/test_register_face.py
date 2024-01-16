@@ -3,7 +3,8 @@ import requests
 from fastapi.testclient import TestClient
 from main.main import app
 import os
-    
+
+
 client = TestClient(app)
 def test_register_face():
     # Open a test image file in binary mode
