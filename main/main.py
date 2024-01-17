@@ -19,6 +19,7 @@ faceEntries = db["faceEntries"]
 
 app = FastAPI()
 
+# deprecated
 @app.post("/upload/")
 async def register_face(file: UploadFile = File(...)):
 

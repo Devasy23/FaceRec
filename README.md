@@ -59,8 +59,7 @@ The database contains a `faceEntries` collection with the following schema:
 
 1. `create_new_faceEntry()`: This function receives a POST request with an image and metadata (age and gender). It extracts the face from the image, calculates the embeddings, and stores the data in the database.
 
-2. `register_face()`: This function ...
-
+2. `register_face()`: This function is used to store face images in the database, it is currently deprecated.
 ## Testing
 
 To run the tests, use the following command:
