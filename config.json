@@ -1,0 +1,8 @@
+{
+    "DEBUG": true,
+    "EXTRACTED_IMAGE": "static/extractfolder",
+    "UPLOAD_FOLDER" : "static/uploads/",
+    "DISPLAY_IMAGE" : "static/displayfolder",
+    "ALLOWED_EXTENSIONS":["jpg","jpeg","png","jfif"],
+    "IMAGE_DATA": "static/image_data.json"
+}
