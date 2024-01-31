@@ -1,0 +1,9 @@
+project/
+│
+├── main/
+│   ├── __init__.py
+│   └── main.py
+│
+└── tests/
+    ├── __init__.py
+    └── test_register_face.py

@@ -1,20 +1,73 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Face Recognition Project
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+This project uses FastAPI and DeepFace to create a face recognition system. It allows users to register faces with associated metadata, and then recognizes faces in new images.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+## Getting Started
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+### Prerequisites
+
+This project requires Python 3.7 or later.
+
+### Installing
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://gitlab.com/Devasy23/FaceRec.git
+    ```
+
+2. Navigate to the project directory:
+
+    ```bash
+    cd FaceRec
+    ```
+
+3. Install the required packages:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+### Running the Server
+
+To start the FastAPI server, run the following command:
+
+```bash
+uvicorn main:app --reload
+```
+
+## Project Structure
+
+- `main/`: Contains the main FastAPI application.
+- `Images/`: Contains the original images and extracted faces.
+- `testing/`: Contains the test cases for the application.
+- `requirements.txt`: Contains the Python dependencies for the project.
+
+## Database Schema
+
+The database contains a `faceEntries` collection with the following schema:
+
+- `id`: A unique identifier for the face entry.
+- `age`: The age of the person.
+- `gender`: The gender of the person.
+- `time`: The time the face entry was created.
+- `embeddings`: The embeddings of the face image.
+
+## Function Flow
+
+1. `create_new_faceEntry()`: This function receives a POST request with an image and metadata (age and gender). It extracts the face from the image, calculates the embeddings, and stores the data in the database.
+
+2. `register_face()`: This function is used to store face images in the database, it is currently deprecated.
+## Testing
+
+To run the tests, use the following command:
+
+```bash
+pytest
+```
+
+## License
+
+This project is licensed under the APACHE License - see the [LICENSE](LICENSE) file for details.
