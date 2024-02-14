@@ -15,7 +15,7 @@ This project requires Python 3.7 or later.
 1. Clone this repository to your local system using link
 
     ```bash
-    git clone "link"
+    git clone "https://dev.azure.com/tmspl/FaceRec/_git/FaceRec-Employee-Enrollment.python"
     ```
 
 2. Navigate to the project directory:
