@@ -47,14 +47,14 @@ python Flaskapp.py
 ## Database Schema
 
 1. Create new connection in MongoDB and Connect using given url
-    URL: mongodb://localhost:27017/8000
+   `URL: mongodb://localhost:27017/8000`
 
 2.  Create database using 
-    Database name: ImageDB
-    Collection name: faceEntries
+    Database name: `ImageDB`
+    Collection name: `faceEntries`
 
 3.  Add data by importing json file:
-    From 'db' folder -> ImageDB.faceEntries.json
+    From 'db' folder -> `ImageDB.faceEntries.json`
 
 The database contains a `faceEntries` collection with the following schema:
 
