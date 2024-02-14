@@ -1,6 +1,6 @@
 # Face Recognition Project
 
-This project uses Flask, FastAPI and DeepFace to create a Face recognition system. It allows users to register face with associated metadata, update their information and also can delete their data.
+This project uses Flask, FastAPI,DeepFace and MongoDB to create a Face recognition system. It allows users to register face with associated metadata, update their information and also can delete their data.
 
 ### Get started
 
@@ -45,6 +45,16 @@ python Flaskapp.py
 - `Flaskapp.py`: Contains code of Flask and FastAPI application
 
 ## Database Schema
+
+1. Create new connection in MongoDB and Connect using given url
+    URL: mongodb://localhost:27017/8000
+
+2.  Create database using 
+    Database name: ImageDB
+    Collection name: faceEntries
+
+3.  Add data by importing json file:
+    From 'db' folder -> ImageDB.faceEntries.json
 
 The database contains a `faceEntries` collection with the following schema:
 
