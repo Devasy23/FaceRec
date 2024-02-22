@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewpoint" content="width=device-width, initial-scale=1.0">
+    <title>Capture image</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="../static/index.css">
+
+</head>
+<body style="background-color: rgb(255, 255, 255);font-family: Georgia, 'Times New Roman', Times, serif;color: rgb(36, 1, 59);">
+    <h1 style="text-align: center;font-family: Georgia, 'Times New Roman', Times, serif;" >Face Rec System</h1>
+    <br><br>
+        <div class="container">
+          <div>
+            <div class="form-wrap">
+              <h2 style="text-align: center;font-weight:bold;" class="form-inline" >Employee Details</h2><br>
+              <form action="/submit_form" method="POST" id="survey-form" enctype="multipart/form-data">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                  <label for="EmployeeCode" class="form-label">Employee Code:</label><br>
+                  <input type="number" id="EmployeeCode" name="EmployeeCode" class="form-control" required><br><br>
+                  </div>
+                  </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                <label for="Name" style="margin-bottom: 9px;"">Employee Name:</label><br>
+                <input type="text" id="Name" name="Name" class="form-control" required><br><br>
+                </div>
+                </div>
+                </div>
+                <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                <label for="Gender" class="form-label">Gender:</label><br>
+                <div style="padding-top: 10px;">
+                <select id="Gender" name="Gender" class="form-select form-select-lg mb-3 bg-primary.bg-gradient" aria-label=".form-select-lg example" required>
+                  <option value="Male" class="dropdown-item active">Male</option>
+                  <option value="Female" class="dropdown-item" >Female</option>
+                  <option value="Other" class="dropdown-item">Other</option>
+                </select><br><br></div>
+                </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="form-group">
+                  <label for="Department"  class="form-label" >Department:</label><br>
+                  <div style="padding-top: 10px;">
+                  <select id="Department" name="Department" class="form-select form-select-lg mb-3 bg-primary.bg-gradient" aria-label=".form-select-lg example" required>
+                    <option value="Software" class="dropdown-item active">Software</option>
+                    <option value="BPO/KPO" class="dropdown-item" >BPO/KPO</option>
+                    <option value="Other" class="dropdown-item">Other</option>
+                  </select><br><br></div>
+                  </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label style="font-size: medium;">Upload Image</label>
+                      <input type="file" name='File' id="File"/><br><br>
+                    </div>
+                  </div>
+                </div>
+            <div class="row">
+            </div>
+            <div class="col-md-4" style="margin-left: 145px;">
+            <center><input type="submit" id="Submit" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail" ></center>
+            </div>
+            </div>
+            </form>
+            </div>
+            
+            <div class="form-wrap" style="width:auto; height: auto;">
+            <h2 style="text-align: center;font-family: Georgia, 'Times New Roman', Times, serif;color: rgb(36, 1, 59);font-weight: bold;font-size:large;"> Webcam Video Stream</h2>
+            <center><button id="myButton" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"> Video </button></center><br><br>
+            <div id="myPopup" class="popup" class="form-wrap">
+            <div class="popup-content" class="form-group">
+            <img src="{{url_for('employee_blueprint.video_feed')}}" width="1050" height="550" style="margin-left:2.5%;"/><br><br> 
+            <div class="container">
+            <button id="captureButton"class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"> Capture </button>
+            <button  id="closePopup" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail">Close</button> 
+            </div>
+            </div>
+            </div>
+            <h2 class="text-center" id="Upload"style="text-align: center;font-family: Georgia, 'Times New Roman', Times, serif;color: rgb(36, 1, 59);font-weight: bold;" hidden> Uploaded Image</h2>
+            
+            <img src="Image.png" alt="recently added image" id="Image" width="600" height="500" hidden/><br><br> 
+            
+            </div>
+            </div>
+            
+        
+        
+</body>
+<script src="../static/index.js"></script>
+  <script>
+
+</script>
+</html>
