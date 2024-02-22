@@ -1,6 +1,6 @@
 # Face Recognition Project
 
-This project uses Flask, FastAPI and DeepFace to create a Face recognition system. It allows users to register face with associated metadata, update their information and also can delete their data.
+This project uses Flask, FastAPI,DeepFace and MongoDB to create a Face recognition system. It allows users to register face with associated metadata, update their information and also can delete their data.
 
 ### Get started
 
@@ -34,17 +34,27 @@ This project requires Python 3.7 or later.
 ### Running the Server
 To start FLask and FastAPI, run the given command:
 ```bash
-python Flaskapp.py
+python main.py
 ```
 
 ## Project Structure
 
 - `requirements.txt`: Contains the Python dependencies for the project.
-- `template/`:  Contains all the necessary HTML files to build your web pages.
-- `static/`: Contains all files which is used by frontend to load data from backend.
-- `Flaskapp.py`: Contains code of Flask and FastAPI application
+- `API/`: Contains code of FastAPI application.
+- `FaceRec/`: Contain all files of HTML,CSS and flask application.
+- `main.py`: Contains code of to start FastAPI and flask together.
 
 ## Database Schema
+
+1. Create new connection in MongoDB and Connect using given url
+   `URL: mongodb://localhost:27017/8000`
+
+2.  Create database using 
+    Database name: `DatabaseName`
+    Collection name: `CollectionName`
+
+3.  Add data by importing json file:
+    From 'database.mongo' folder -> `{DatabaseName}.{CollectionName}.json`
 
 The database contains a `faceEntries` collection with the following schema:
 
@@ -57,7 +67,7 @@ The database contains a `faceEntries` collection with the following schema:
 - `embeddings`: The embeddings of the face image.
 - `Image`: Base64 encoded image file.
 
-## Function Flow
+## Function Flow 
 
 1. `create_new_faceEntry()`: This function receives a POST request with an image and metadata. It extracts the face from the image, calculates the embeddings, and stores the data in the database.
 

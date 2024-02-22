@@ -15,7 +15,7 @@
             <h1> List of Employees:</h1>
           </div>
           <div class="col" style="padding-top: 15px;padding-left: 450px;">
-            <center><button class="btn btn-primary bg-primary.bg-gradient" style="background-color:#330c61;; border: 0px; justify-content: space-around;" class="img-thumbnail" onclick="add_employee()">Add Employee</button>
+            <center><a href="{{url_for('flk_blueprint .add_employee')}}"><button class="btn btn-primary bg-primary.bg-gradient" style="background-color:#330c61;; border: 0px; justify-content: space-around;" class="img-thumbnail">Add Employee</button></center></a>
             </center>
             </div>
         </div>
@@ -39,8 +39,8 @@
                 <td>{{Employee.gender}} </td>
                 <td>{{Employee.Department}}</td>
                 <!-- <td><img src="data:image/png;base64,{{Employee.image}}" alt=" Image" height="150" width="200"></td> -->
-                <td><a href="{{url_for('Delete',EmployeeCode=Employee.EmployeeCode)}}"><button id="Delete" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail" style="background-color:#330c61;; border: 0px; justify-content: space-around;">Delete</button></a></td>
-                <td><a href="{{url_for('edit',EmployeeCode=Employee.EmployeeCode)}}"><button id="Edit" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"style="background-color:#330c61;; border: 0px; justify-content: space-around;">Edit</button></a></td>
+                <td><a href="{{url_for('flk_blueprint .Delete',EmployeeCode=Employee.EmployeeCode)}}"><button id="Delete" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail" style="background-color:#330c61;; border: 0px; justify-content: space-around;">Delete</button></a></td>
+                <td><a href="{{url_for('flk_blueprint .edit',EmployeeCode=Employee.EmployeeCode)}}"><button id="Edit" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"style="background-color:#330c61;; border: 0px; justify-content: space-around;">Edit</button></a></td>
             </tr>
                 {%endfor%}
             
@@ -48,5 +48,5 @@
       </div>
       
 </body>
-<script src="static/index.js"></script>
+<script src="../static/index.js"></script>
 </html>

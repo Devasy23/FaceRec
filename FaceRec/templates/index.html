@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="static/index.css">
+    <link rel="stylesheet" href="../static/index.css">
 
 </head>
 <body style="background-color: rgb(255, 255, 255);font-family: Georgia, 'Times New Roman', Times, serif;color: rgb(36, 1, 59);">
@@ -17,7 +17,7 @@
           <div>
             <div class="form-wrap">
               <h2 style="text-align: center;font-weight:bold;" class="form-inline" >Employee Details</h2><br>
-              <form action="/submit_form" method="POST" id="survey-form">
+              <form action="/submit_form" method="POST" id="survey-form" enctype="multipart/form-data">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
@@ -57,6 +57,14 @@
                   </div>
                   </div>
                 </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label style="font-size: medium;">Upload Image</label>
+                      <input type="file" name='File' id="File"/><br><br>
+                    </div>
+                  </div>
+                </div>
             <div class="row">
             </div>
             <div class="col-md-4" style="margin-left: 145px;">
@@ -71,7 +79,7 @@
             <center><button id="myButton" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"> Video </button></center><br><br>
             <div id="myPopup" class="popup" class="form-wrap">
             <div class="popup-content" class="form-group">
-            <img src="{{url_for('video_feed')}}" width="1050" height="550" style="margin-left:2.5%;"/><br><br> 
+            <img src="{{url_for('employee_blueprint.video_feed')}}" width="1050" height="550" style="margin-left:2.5%;"/><br><br> 
             <div class="container">
             <button id="captureButton"class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"> Capture </button>
             <button  id="closePopup" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail">Close</button> 
@@ -88,7 +96,7 @@
         
         
 </body>
-<script src="static/index.js"></script>
+<script src="../static/index.js"></script>
   <script>
 
 </script>

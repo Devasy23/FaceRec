@@ -190,7 +190,7 @@ label{
             <div class="form-wrap">
               <h2 style="text-align: center;font-weight:bold;" class="form-inline" >Employee Details</h2><br>
     
-              <form  method="POST" id="survey-form">
+              <form  method="POST" action="/submit_form" id="survey-form" enctype="multipart/form-data">
                 <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
@@ -225,6 +225,14 @@ label{
                   </div>
                   </div>
                 </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label style="font-size: medium;">Upload Image</label>
+                      <input type="file" name='File' id="File"/><br><br>
+                    </div>
+                  </div>
+                </div>
             <div class="row">
             <div class="col-md-4" style="margin-left: 145px;">
             <center><input type="submit" id="Submit" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail" ></center>
@@ -239,7 +247,7 @@ label{
             <center><button id="myButton" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"> Video </button></center><br><br>
             <div id="myPopup" class="popup" class="form-wrap">
             <div class="popup-content" class="form-group">
-            <img src="{{url_for('video_feed')}}" width="1050" height="550" style="margin-left:2.5%;"/><br><br> 
+            <img src="{{url_for('employee_blueprint.video_feed')}}" width="1050" height="550" style="margin-left:2.5%;"/><br><br> 
             <div class="container">
             <button id="captureButton"class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"> Capture </button>
             <button  id="closePopup" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail">Close</button> 

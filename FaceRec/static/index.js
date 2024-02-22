@@ -21,10 +21,10 @@ $(document).ready(function () {
 });
 
 
-
 function updateImage(){
     var img = document.getElementById('Image');
-    img.src = "static/uploads/final.png";
+    img.src = 'static/Images/uploads/final.png';
+    alert(img.src)
 }
 
 function enableImage(){
@@ -50,6 +50,6 @@ window.addEventListener("click", function (event) {
 
 //Table.html Js
 
-function add_employee(){
-    window.location ="/Add_employee";
-}
+// function add_employee(){
+//     window.location ="flk_blueprint/Add_employee";
+// }
