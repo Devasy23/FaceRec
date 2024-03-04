@@ -9,6 +9,19 @@ from datetime import datetime
 from pymongo import MongoClient
 from deepface import DeepFace
 from bson import ObjectId
+import logging
+from matplotlib import pyplot as plt
+
+
+
+# Create a logger object
+logger = logging.getLogger(__name__)
+# Create a file handler
+handler = logging.FileHandler('log.log')
+handler.setLevel(logging.INFO)
+# Create a logging format
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
 
 router = APIRouter()
 
@@ -39,13 +52,16 @@ class UpdateEmployee(BaseModel):
 async def create_new_faceEntry(EmployeeCode:int= Form(...),Name: str=Form(...), gender: str=Form(...),Department: str= Form(...),encoded_image: str=Form(...)):
     time = datetime.now()
     img_recovered = base64.b64decode(encoded_image)  # decode base64string
-    print(img_recovered)
+    # print(img_recovered)
     pil_image = Image.open(BytesIO(img_recovered))
     image_filename= f"{Name}.png"
     pil_image.save(image_filename)
+    # print path of the current working directory
+    # pil_image.save(f"Images\dbImages\{Name}.jpg")
     # Extract the face from the image
     face_image_data = DeepFace.extract_faces(image_filename, detector_backend="mtcnn",enforce_detection=False)
     # Calculate the embeddings of the face image
+    # plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]['face'])
     embeddings = DeepFace.represent(image_filename, model_name="Facenet", detector_backend="mtcnn")
     os.remove(image_filename)
     # Store the data in the database
@@ -64,12 +80,17 @@ async def create_new_faceEntry(EmployeeCode:int= Form(...),Name: str=Form(...), 
 @router.get("/Data/",response_model=list[Employee])
 async def get_employees():
     employees_mongo =  faceEntries.find()
-    print(employees_mongo)
-    employees_mongo_data = [Employee(EmployeeCode=employee['EmployeeCode'],Name=employee['Name'],gender=employee['gender'],
-                                    Department=employee['Department'],Image=employee['Image'])
-                            for employee in employees_mongo]
-   
-    return employees_mongo_data
+    employees = [
+        Employee(
+            EmployeeCode=int(employee.get('EmployeeCode', 0)),
+            Name=employee.get('Name', 'N/A'),
+            gender=employee.get('gender', 'N/A'),
+            Department=employee.get('Department', 'N/A'),
+            Image=employee.get('Image', 'N/A')
+        )
+        for employee in employees_mongo
+    ]
+    return employees
 
 #To display specific record info
 @router.get('/read/{EmployeeCode}', response_class=Response)
