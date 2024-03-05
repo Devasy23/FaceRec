@@ -64,13 +64,13 @@ async def create_new_faceEntry(Employee: Employee):
     image_filename = f"{Name}.png"
     pil_image.save(image_filename)
     # print path of the current working directory
-    # pil_image.save(f"Images\dbImages\{Name}.jpg")
+    pil_image.save(f"Images\dbImages\{Name}.jpg")
     # Extract the face from the image
     face_image_data = DeepFace.extract_faces(
         image_filename, detector_backend="mtcnn", enforce_detection=False
     )
     # Calculate the embeddings of the face image
-    # plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]['face'])
+    plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]['face'])
     embeddings = DeepFace.represent(
         image_filename, model_name="Facenet", detector_backend="mtcnn"
     )
