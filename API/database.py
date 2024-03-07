@@ -1,5 +1,6 @@
-from pymongo import MongoClient
 from datetime import datetime
+
+from pymongo import MongoClient
 
 
 class Database:
@@ -13,11 +14,11 @@ class Database:
     def insert_one(self, collection, document):
         return self.db[collection].insert_one(document)
 
-    def find_one(self, collection,filter, projection=None):
-        return self.db[collection].find_one(filter=filter ,projection=projection)
-    
+    def find_one(self, collection, filter, projection=None):
+        return self.db[collection].find_one(filter=filter, projection=projection)
+
     def find_one_and_delete(self, collection, query):
         return self.db[collection].find_one_and_delete(query)
-    
+
     def update_one(self, collection, query, update):
         return self.db[collection].update_one(query, update)

@@ -12,6 +12,7 @@ from matplotlib import pyplot as plt
 from PIL import Image
 from pydantic import BaseModel
 from pymongo import MongoClient
+
 from API.database import Database
 
 # Create a logger object
@@ -33,7 +34,7 @@ router = APIRouter()
 # db = client["ImageDB"]
 client = Database()
 
-collection="faceEntries"
+collection = "faceEntries"
 
 
 # Models  for the data to be sent and received by the server
@@ -73,13 +74,15 @@ async def create_new_faceEntry(Employee: Employee):
         image_filename, detector_backend="mtcnn", enforce_detection=False
     )
     # Calculate the embeddings of the face image
-    plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]['face'])
+    plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]["face"])
     embeddings = DeepFace.represent(
         image_filename, model_name="Facenet", detector_backend="mtcnn"
     )
     os.remove(image_filename)
     # Store the data in the database
-    client.insert_one(collection, {
+    client.insert_one(
+        collection,
+        {
             "EmployeeCode": EmployeeCode,
             "Name": Name,
             "gender": gender,
@@ -87,9 +90,10 @@ async def create_new_faceEntry(Employee: Employee):
             "time": time,
             "embeddings": embeddings,
             "Image": encoded_image,
-        })
+        },
+    )
     # db.faceEntries.insert_one(
-        
+
     # )
     return {"message": "Face entry created successfully"}
 
@@ -116,7 +120,8 @@ async def get_employees():
 async def read_employee(EmployeeCode: int):
     try:
         # logger.info(f"Start {EmployeeCode}")
-        items = client.find_one(collection,
+        items = client.find_one(
+            collection,
             filter={"EmployeeCode": EmployeeCode},
             projection={
                 "Name": True,
@@ -146,8 +151,8 @@ async def read_employee(EmployeeCode: int):
 async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
     try:
         # logger.warning("Updating Start")
-        user_id = client.find_one(collection,
-            {"EmployeeCode": EmployeeCode}, projection={"_id": True}
+        user_id = client.find_one(
+            collection, {"EmployeeCode": EmployeeCode}, projection={"_id": True}
         )
         print(user_id)
         if not user_id:
@@ -155,7 +160,8 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
         Employee_data = Employee.model_dump(by_alias=True, exclude_unset=True)
         # logger.info(f"Employee data to update: {Employee_data}")
         try:
-            update_result = client.update_one(collection,
+            update_result = client.update_one(
+                collection,
                 filter={"_id": ObjectId(user_id["_id"])},
                 update={"$set": Employee_data},
             )

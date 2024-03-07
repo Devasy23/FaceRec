@@ -1,12 +1,12 @@
 import base64
 from unittest.mock import MagicMock, patch
-from API.database import Database
+
 from fastapi.testclient import TestClient
 
+from API.database import Database
 from API.route import router
 
 client = TestClient(router)
-
 
 
 @patch("API.database.Database.find_one_and_delete")
@@ -14,7 +14,13 @@ client = TestClient(router)
 @patch("API.database.Database.find_one")
 @patch("API.database.Database.find")
 @patch("API.database.Database.insert_one")
-def test_face_lifecycle(mock_insert_one: MagicMock, mock_find: MagicMock, mock_find_one: MagicMock, mock_update_one: MagicMock, mock_find_one_and_delete: MagicMock):
+def test_face_lifecycle(
+    mock_insert_one: MagicMock,
+    mock_find: MagicMock,
+    mock_find_one: MagicMock,
+    mock_update_one: MagicMock,
+    mock_find_one_and_delete: MagicMock,
+):
     # Register two new faces
     mock_doc = {
         "_id": "65e6284d01f95cd96ea334a7",
