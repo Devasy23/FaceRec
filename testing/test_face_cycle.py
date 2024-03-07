@@ -1,5 +1,6 @@
 import base64
-
+from unittest.mock import MagicMock, patch
+from API.database import Database
 from fastapi.testclient import TestClient
 
 from API.route import router
@@ -7,8 +8,29 @@ from API.route import router
 client = TestClient(router)
 
 
-def test_face_lifecycle():
+
+@patch("API.database.Database.find_one_and_delete")
+@patch("API.database.Database.update_one")
+@patch("API.database.Database.find_one")
+@patch("API.database.Database.find")
+@patch("API.database.Database.insert_one")
+def test_face_lifecycle(mock_insert_one: MagicMock, mock_find: MagicMock, mock_find_one: MagicMock, mock_update_one: MagicMock, mock_find_one_and_delete: MagicMock):
     # Register two new faces
+    mock_doc = {
+        "_id": "65e6284d01f95cd96ea334a7",
+        "EmployeeCode": "1",
+        "Name": "Devansh",
+        "gender": "Male",
+        "Department": "IT",
+        "Image": "encoded_string1",
+    }
+
+    # Configure the mock to return the mock document when find() is called
+    mock_find.return_value = [mock_doc, mock_doc]
+    mock_insert_one.return_value = MagicMock(inserted_id="1")
+    mock_find_one.return_value = mock_doc
+    mock_update_one.return_value = MagicMock(modified_count=1)
+    mock_find_one_and_delete.return_value = mock_doc
     with open("./test-faces/devansh.jpg", "rb") as image_file:
         encoded_string1 = base64.b64encode(image_file.read()).decode("utf-8")
     response1 = client.post(
@@ -42,7 +64,7 @@ def test_face_lifecycle():
     # Get all data
     response = client.get("/Data/")
     assert response.status_code == 200
-    # assert len(response.json()) == 2
+    assert len(response.json()) == 2
 
     # Update a face
     response = client.put(
@@ -60,7 +82,7 @@ def test_face_lifecycle():
     # Get all data again
     response = client.get("/Data/")
     assert response.status_code == 200
-    # assert len(response.json()) == 2
+    assert len(response.json()) == 2
 
     # Delete a face
     response = client.delete("/delete/1")

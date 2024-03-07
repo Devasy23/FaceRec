@@ -12,6 +12,7 @@ from matplotlib import pyplot as plt
 from PIL import Image
 from pydantic import BaseModel
 from pymongo import MongoClient
+from API.database import Database
 
 # Create a logger object
 logger = logging.getLogger(__name__)
@@ -25,12 +26,14 @@ handler.setFormatter(formatter)
 router = APIRouter()
 
 # To create connection with Mongodb
-mongodb_uri = "mongodb://localhost:27017/"
-port = 8000
-client = MongoClient(mongodb_uri, port)
+# mongodb_uri = "mongodb://localhost:27017/"
+# port = 8000
+# client = MongoClient(mongodb_uri, port)
 
-db = client["ImageDB"]
-faceEntries = db["faceEntries"]
+# db = client["ImageDB"]
+client = Database()
+
+collection="faceEntries"
 
 
 # Models  for the data to be sent and received by the server
@@ -76,8 +79,7 @@ async def create_new_faceEntry(Employee: Employee):
     )
     os.remove(image_filename)
     # Store the data in the database
-    db.faceEntries.insert_one(
-        {
+    client.insert_one(collection, {
             "EmployeeCode": EmployeeCode,
             "Name": Name,
             "gender": gender,
@@ -85,15 +87,17 @@ async def create_new_faceEntry(Employee: Employee):
             "time": time,
             "embeddings": embeddings,
             "Image": encoded_image,
-        }
-    )
+        })
+    # db.faceEntries.insert_one(
+        
+    # )
     return {"message": "Face entry created successfully"}
 
 
 # To display all records
 @router.get("/Data/", response_model=list[Employee])
 async def get_employees():
-    employees_mongo = faceEntries.find()
+    employees_mongo = client.find(collection)
     employees = [
         Employee(
             EmployeeCode=int(employee.get("EmployeeCode", 0)),
@@ -112,7 +116,7 @@ async def get_employees():
 async def read_employee(EmployeeCode: int):
     try:
         # logger.info(f"Start {EmployeeCode}")
-        items = faceEntries.find_one(
+        items = client.find_one(collection,
             filter={"EmployeeCode": EmployeeCode},
             projection={
                 "Name": True,
@@ -142,7 +146,7 @@ async def read_employee(EmployeeCode: int):
 async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
     try:
         # logger.warning("Updating Start")
-        user_id = faceEntries.find_one(
+        user_id = client.find_one(collection,
             {"EmployeeCode": EmployeeCode}, projection={"_id": True}
         )
         print(user_id)
@@ -151,7 +155,7 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
         Employee_data = Employee.model_dump(by_alias=True, exclude_unset=True)
         # logger.info(f"Employee data to update: {Employee_data}")
         try:
-            update_result = faceEntries.update_one(
+            update_result = client.update_one(collection,
                 filter={"_id": ObjectId(user_id["_id"])},
                 update={"$set": Employee_data},
             )
@@ -170,6 +174,6 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
 @router.delete("/delete/{EmployeeCode}")
 async def delete_employees(EmployeeCode: int):
     print(EmployeeCode)
-    db.faceEntries.find_one_and_delete({"EmployeeCode": EmployeeCode})
+    client.find_one_and_delete(collection, {"EmployeeCode": EmployeeCode})
 
     return {"Message": "Successfully Deleted"}
