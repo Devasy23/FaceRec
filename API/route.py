@@ -4,7 +4,7 @@ import logging
 import os
 from datetime import datetime
 from io import BytesIO
-
+from typing import List, Optional
 from bson import ObjectId
 from deepface import DeepFace
 from fastapi import APIRouter, Form, HTTPException, Response
@@ -15,12 +15,13 @@ from pymongo import MongoClient
 
 # Create a logger object
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 # Create a file handler
 handler = logging.FileHandler("log.log")
 handler.setLevel(logging.INFO)
-# Create a logging format
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
+
+logger.addHandler(handler)
+logger.info("Logger created")
 
 router = APIRouter()
 
@@ -41,7 +42,6 @@ class Employee(BaseModel):
     Department: str
     Image: str
 
-
 class UpdateEmployee(BaseModel):
     Name: str
     gender: str
@@ -57,12 +57,30 @@ async def create_new_faceEntry(Employee: Employee):
     gender = Employee.gender
     Department = Employee.Department
     encoded_image = Employee.Image
+    logger.info(f"Employee data: {Employee}")
+    try:
+        existing_Images = faceEntries.find_one({"EmployeeCode": EmployeeCode, "Name": Name, "Department": Department}, projection={"_id": False, "PreviousImages": True})
+        print("Existing Images: ", existing_Images)
+        if not existing_Images:
+            existing_Images = []
+    except Exception as e:
+        print("\n\n\nIn exception\n\n\n")
+        print(e)
+    try:
+        previous_Embeddings = faceEntries.find_one({"EmployeeCode": EmployeeCode, "Name": Name, "Department": Department}, projection={"_id": False, "Embeddings": True})
+        print("Previous Embeddings: ", previous_Embeddings)
+        if not previous_Embeddings:
+            previous_Embeddings = []
+    except Exception as e:
+        print("\n\n\nIn exception\n\n\n")
+        print(e)
     time = datetime.now()
     img_recovered = base64.b64decode(encoded_image)  # decode base64string
     # print(img_recovered)
     pil_image = Image.open(BytesIO(img_recovered))
     image_filename = f"{Name}.png"
     pil_image.save(image_filename)
+    logger.info(f"Image saved: {image_filename}")
     # print path of the current working directory
     # pil_image.save(f"Images\dbImages\{Name}.jpg")
     # Extract the face from the image
@@ -74,7 +92,13 @@ async def create_new_faceEntry(Employee: Employee):
     embeddings = DeepFace.represent(
         image_filename, model_name="Facenet", detector_backend="mtcnn"
     )
+    logger.info(f"Embeddings calculated: {embeddings}")
     os.remove(image_filename)
+    # Update previous images and embeddings
+    existing_Images = []
+    previous_Embeddings = []
+    existing_Images.append(encoded_image)
+    previous_Embeddings.append(embeddings)
     # Store the data in the database
     db.faceEntries.insert_one(
         {
@@ -83,8 +107,8 @@ async def create_new_faceEntry(Employee: Employee):
             "gender": gender,
             "Department": Department,
             "time": time,
-            "embeddings": embeddings,
-            "Image": encoded_image,
+            "PreviousImages": existing_Images,
+            "Embeddings": previous_Embeddings,
         }
     )
     return {"message": "Face entry created successfully"}
