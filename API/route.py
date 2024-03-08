@@ -4,9 +4,8 @@ import logging
 import os
 from datetime import datetime
 from io import BytesIO
-
-from API.utils import init_logging_config
 from typing import List
+
 from bson import ObjectId
 from deepface import DeepFace
 from fastapi import APIRouter, Form, HTTPException, Response
@@ -16,6 +15,7 @@ from pydantic import BaseModel
 from pymongo import MongoClient
 
 from API.database import Database
+from API.utils import init_logging_config
 
 init_logging_config()
 
@@ -64,11 +64,12 @@ async def create_new_faceEntry(Employee: Employee):
     Department = Employee.Department
     encoded_images = Employee.Images
     time = datetime.now()
-    
+
     embeddings = []
     for encoded_image in encoded_images:
         img_recovered = base64.b64decode(encoded_image)  # decode base64string
         pil_image = Image.open(BytesIO(img_recovered))
+        logging.info(f"Image opened {Name}")
         image_filename = f"{Name}.png"
         pil_image.save(image_filename)
         pil_image.save(f"Images\dbImages\{Name}.jpg")
@@ -76,12 +77,15 @@ async def create_new_faceEntry(Employee: Employee):
             image_filename, detector_backend="mtcnn", enforce_detection=False
         )
         plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]["face"])
+        logging.info(f"Face saved {Name}")
         embedding = DeepFace.represent(
             image_filename, model_name="Facenet", detector_backend="mtcnn"
         )
         embeddings.append(embedding)
+        logging.info(f"Embedding created Embeddings for {Name}")
         os.remove(image_filename)
-    
+
+    logging.debug(f"About to insert Embeddings: {embeddings}")
     # Store the data in the database
     client.insert_one(
         collection,
@@ -95,7 +99,7 @@ async def create_new_faceEntry(Employee: Employee):
             "Images": encoded_images,
         },
     )
-    
+
     return {"message": "Face entry created successfully"}
 
 

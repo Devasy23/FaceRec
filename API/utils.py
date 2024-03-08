@@ -35,7 +35,7 @@ def init_logging_config():
     stderr_handler.setFormatter(CustomFormatter())
     logger.addHandler(stderr_handler)
 
-    file_handler = logging.FileHandler("app.log",  mode="w")
+    file_handler = logging.FileHandler("app.log", mode="w")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(CustomFormatter(True))
     logger.addHandler(file_handler)
