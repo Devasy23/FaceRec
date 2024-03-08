@@ -11,6 +11,7 @@ linting-job:
   script:
     - echo "Linting code... This will take about 10 seconds."
     - pip install -r requirements.txt
+    - pip install black isort flake8 pytest-cov
     - black .
     - isort .
     - flake8 . || echo "Linting check failed but allowed to continue"
@@ -20,6 +21,7 @@ pytest-job:
   script:
     - echo "Running pytest... This will take about 1 minute."
     - pip install -r requirements.txt
+    - pip install black isort flake8 pytest-cov
     - black .
     - pytest --junitxml=pytest.xml
     - pytest --cov --cov-report term --cov-report xml:coverage.xml
