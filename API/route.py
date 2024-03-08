@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 from io import BytesIO
 from typing import List, Optional
+
 from bson import ObjectId
 from deepface import DeepFace
 from fastapi import APIRouter, Form, HTTPException, Response
@@ -12,6 +13,8 @@ from matplotlib import pyplot as plt
 from PIL import Image
 from pydantic import BaseModel
 from pymongo import MongoClient
+
+from API.database import Database
 
 # Create a logger object
 logger = logging.getLogger(__name__)
@@ -26,12 +29,14 @@ logger.info("Logger created")
 router = APIRouter()
 
 # To create connection with Mongodb
-mongodb_uri = "mongodb://localhost:27017/"
-port = 8000
-client = MongoClient(mongodb_uri, port)
+# mongodb_uri = "mongodb://localhost:27017/"
+# port = 8000
+# client = MongoClient(mongodb_uri, port)
 
-db = client["ImageDB"]
-faceEntries = db["faceEntries"]
+# db = client["ImageDB"]
+client = Database()
+
+collection = "faceEntries"
 
 
 # Models  for the data to be sent and received by the server
@@ -40,7 +45,8 @@ class Employee(BaseModel):
     Name: str
     gender: str
     Department: str
-    Image: str
+    Images: List[str]
+
 
 class UpdateEmployee(BaseModel):
     Name: str
@@ -59,7 +65,10 @@ async def create_new_faceEntry(Employee: Employee):
     encoded_image = Employee.Image
     logger.info(f"Employee data: {Employee}")
     try:
-        existing_Images = faceEntries.find_one({"EmployeeCode": EmployeeCode, "Name": Name, "Department": Department}, projection={"_id": False, "PreviousImages": True})
+        existing_Images = faceEntries.find_one(
+            {"EmployeeCode": EmployeeCode, "Name": Name, "Department": Department},
+            projection={"_id": False, "Images": True},
+        )
         print("Existing Images: ", existing_Images)
         if not existing_Images:
             existing_Images = []
@@ -67,7 +76,10 @@ async def create_new_faceEntry(Employee: Employee):
         print("\n\n\nIn exception\n\n\n")
         print(e)
     try:
-        previous_Embeddings = faceEntries.find_one({"EmployeeCode": EmployeeCode, "Name": Name, "Department": Department}, projection={"_id": False, "Embeddings": True})
+        previous_Embeddings = faceEntries.find_one(
+            {"EmployeeCode": EmployeeCode, "Name": Name, "Department": Department},
+            projection={"_id": False, "embeddings": True},
+        )
         print("Previous Embeddings: ", previous_Embeddings)
         if not previous_Embeddings:
             previous_Embeddings = []
@@ -82,13 +94,13 @@ async def create_new_faceEntry(Employee: Employee):
     pil_image.save(image_filename)
     logger.info(f"Image saved: {image_filename}")
     # print path of the current working directory
-    # pil_image.save(f"Images\dbImages\{Name}.jpg")
+    pil_image.save(f"Images\dbImages\{Name}.jpg")
     # Extract the face from the image
     face_image_data = DeepFace.extract_faces(
         image_filename, detector_backend="mtcnn", enforce_detection=False
     )
     # Calculate the embeddings of the face image
-    # plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]['face'])
+    plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]["face"])
     embeddings = DeepFace.represent(
         image_filename, model_name="Facenet", detector_backend="mtcnn"
     )
@@ -100,24 +112,28 @@ async def create_new_faceEntry(Employee: Employee):
     existing_Images.append(encoded_image)
     previous_Embeddings.append(embeddings)
     # Store the data in the database
-    db.faceEntries.insert_one(
+    client.insert_one(
+        collection,
         {
             "EmployeeCode": EmployeeCode,
             "Name": Name,
             "gender": gender,
             "Department": Department,
             "time": time,
-            "PreviousImages": existing_Images,
-            "Embeddings": previous_Embeddings,
-        }
+            "embeddings": embeddings,
+            "Images": encoded_image,
+        },
     )
+    # db.faceEntries.insert_one(
+
+    # )
     return {"message": "Face entry created successfully"}
 
 
 # To display all records
 @router.get("/Data/", response_model=list[Employee])
 async def get_employees():
-    employees_mongo = faceEntries.find()
+    employees_mongo = client.find(collection)
     employees = [
         Employee(
             EmployeeCode=int(employee.get("EmployeeCode", 0)),
@@ -136,7 +152,8 @@ async def get_employees():
 async def read_employee(EmployeeCode: int):
     try:
         # logger.info(f"Start {EmployeeCode}")
-        items = faceEntries.find_one(
+        items = client.find_one(
+            collection,
             filter={"EmployeeCode": EmployeeCode},
             projection={
                 "Name": True,
@@ -166,8 +183,8 @@ async def read_employee(EmployeeCode: int):
 async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
     try:
         # logger.warning("Updating Start")
-        user_id = faceEntries.find_one(
-            {"EmployeeCode": EmployeeCode}, projection={"_id": True}
+        user_id = client.find_one(
+            collection, {"EmployeeCode": EmployeeCode}, projection={"_id": True}
         )
         print(user_id)
         if not user_id:
@@ -175,7 +192,8 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
         Employee_data = Employee.model_dump(by_alias=True, exclude_unset=True)
         # logger.info(f"Employee data to update: {Employee_data}")
         try:
-            update_result = faceEntries.update_one(
+            update_result = client.update_one(
+                collection,
                 filter={"_id": ObjectId(user_id["_id"])},
                 update={"$set": Employee_data},
             )
@@ -194,6 +212,6 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
 @router.delete("/delete/{EmployeeCode}")
 async def delete_employees(EmployeeCode: int):
     print(EmployeeCode)
-    db.faceEntries.find_one_and_delete({"EmployeeCode": EmployeeCode})
+    client.find_one_and_delete(collection, {"EmployeeCode": EmployeeCode})
 
     return {"Message": "Successfully Deleted"}

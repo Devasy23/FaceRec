@@ -94,22 +94,26 @@ def submit_form():
     }
     url = "http://127.0.0.1:8000/create_new_faceEntry"
     try:
-        resp = requests.post(url=url, json={
-            "EmployeeCode": 134,
-            "Name": "Name",
-            "gender": "gender",
-            "Department": "Department",
-            "Image": "your_image",
-        })
+        resp = requests.post(
+            url=url,
+            json={
+                "EmployeeCode": 134,
+                "Name": "Name",
+                "gender": "gender",
+                "Department": "Department",
+                "Image": "your_image",
+            },
+        )
         resp.status_code
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
     jsonify({"message": "Successfully executed"})
     print("Executed.")
-    if resp.status_code==200:
+    if resp.status_code == 200:
         return redirect("DisplayingEmployees")
     else:
         return jsonify({"message": "Failed to execute"})
+
 
 # To edit an employee details
 @flk_blueprint.route("/edit/<int:EmployeeCode>", methods=["POST", "GET"])

@@ -13,9 +13,7 @@ client = TestClient(router)
 def test_register_face():
     # Open a test image file in binary mode
     IMAGEDIR = "test-faces/"
-    with open(
-        "./test-faces/devansh.jpg", "rb"
-    ) as image_file:
+    with open("./test-faces/devansh.jpg", "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
     response = client.post(
         "/create_new_faceEntry",
