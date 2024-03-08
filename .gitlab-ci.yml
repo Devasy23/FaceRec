@@ -1,0 +1,34 @@
+stages:
+  - build
+  - test
+
+default:
+  image: python:3.9.18-slim-bullseye
+  retry: 2
+
+linting-job:
+  stage: build
+  script:
+    - echo "Linting code... This will take about 10 seconds."
+    - pip install -r requirements.txt
+    - black .
+    - isort .
+    - flake8 . || echo "Linting check failed but allowed to continue"
+
+pytest-job:
+  stage: test
+  script:
+    - echo "Running pytest... This will take about 1 minute."
+    - pip install -r requirements.txt
+    - black .
+    - pytest --junitxml=pytest.xml
+    - pytest --cov --cov-report term --cov-report xml:coverage.xml
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+      junit: pytest.xml
+
+    expire_in: "30 days"
