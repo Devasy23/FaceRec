@@ -11,8 +11,17 @@
 - Updated `test_face_lifecycle` function in [`test_face_cycle.py`](testing/test_face_cycle.py) to handle multiple images for each employee in the test data.
 
 ### Changed
-- Modified the `Employee` and `UpdateEmployee` models in [`route.py`](route/route.py) to include a list of images instead of a single image.
+- Modified the `Employee` model in [`route.py`](route/route.py) to include a list of images instead of a single image.
 - Adjusted the mock data and assertions in [`test_face_cycle.py`](testing/test_face_cycle.py) to handle multiple images for each employee.
 
 ### Fixed
 - Resolved an issue where the `create_new_faceEntry` function in [`route.py`](route/route.py) was not correctly processing multiple images for each employee.
+
+## [0.1.1] - 2024-03-09 - 01:00
+
+### Added
+- Added logging statements to all the API endpoints in [`route.py`](route/route.py) for easier debugging.
+
+### Changed
+- Modified the `UpdateEmployee` models in [`route.py`](route/route.py) to include a list of images instead of a single image.
+- Adjusted the mock data and assertions for update data in [`test_face_cycle.py`](testing/test_face_cycle.py) to handle multiple images for each employee.
