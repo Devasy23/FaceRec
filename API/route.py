@@ -58,6 +58,7 @@ async def create_new_faceEntry(Employee: Employee):
     Raises:
         None
     """
+    logging.info("Creating new face entry")
     Name = Employee.Name
     EmployeeCode = Employee.EmployeeCode
     gender = Employee.gender
@@ -112,7 +113,9 @@ async def get_employees():
     Returns:
         list[Employee]: A list of Employee objects containing employee information.
     """
+    logging.info("Displaying all employees")
     employees_mongo = client.find(collection)
+    logging.info(f"Employees found {employees_mongo}")
     employees = [
         Employee(
             EmployeeCode=int(employee.get("EmployeeCode", 0)),
@@ -142,6 +145,7 @@ async def read_employee(EmployeeCode: int):
         HTTPException: If the employee is not found.
 
     """
+    logging.info(f"Display information for {EmployeeCode}")
     try:
         logging.info(f"Start {EmployeeCode}")
         items = client.find_one(
@@ -191,6 +195,7 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
         HTTPException: If no data was updated during the update operation.
         HTTPException: If an internal server error occurs.
     """
+    logging.info(f"Updating for EmployeeCode: {EmployeeCode}")
     try:
         user_id = client.find_one(
             collection, {"EmployeeCode": EmployeeCode}, projection={"_id": True}
@@ -199,7 +204,7 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
         if not user_id:
             raise HTTPException(status_code=404, detail="Employee not found")
         Employee_data = Employee.model_dump(by_alias=True, exclude_unset=True)
-
+        logging.info(f"Employee data {Employee_data}")
         # Calculate and store embeddings for the updated image array
         encoded_images = Employee.Images
         embeddings = []
@@ -208,12 +213,14 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
             pil_image = Image.open(BytesIO(img_recovered))
             image_filename = f"{Employee.Name}.png"
             pil_image.save(image_filename)
+            logging.info(f"Image saved {Employee.Name}")
             face_image_data = DeepFace.extract_faces(
                 image_filename, detector_backend="mtcnn", enforce_detection=False
             )
             embedding = DeepFace.represent(
                 image_filename, model_name="Facenet", detector_backend="mtcnn"
             )
+            logging.info(f"Embedding created {Employee.Name}")
             embeddings.append(embedding)
             os.remove(image_filename)
         Employee_data["embeddings"] = embeddings
@@ -224,6 +231,7 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
                 filter={"_id": ObjectId(user_id["_id"])},
                 update={"$set": Employee_data},
             )
+            logging.info(f"Update result {update_result}")
             if update_result.modified_count == 0:
                 raise HTTPException(status_code=400, detail="No data was updated")
             return "Updated Successfully"
@@ -245,7 +253,8 @@ async def delete_employees(EmployeeCode: int):
         dict: A dictionary containing a success message.
 
     """
-    print(EmployeeCode)
+    logging.info("Deleting Employee")
+    logging.info(f"Deleting for EmployeeCode: {EmployeeCode}")
     client.find_one_and_delete(collection, {"EmployeeCode": EmployeeCode})
 
     return {"Message": "Successfully Deleted"}
