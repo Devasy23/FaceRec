@@ -22,7 +22,7 @@ def test_register_face():
             "Name": "Test",
             "gender": "Male",
             "Department": "Test",
-            "Image": encoded_string,
+            "Images": [encoded_string],
         },
     )
     assert response.status_code == 200
