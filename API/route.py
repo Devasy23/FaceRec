@@ -5,6 +5,8 @@ import os
 from datetime import datetime
 from io import BytesIO
 
+from API.utils import init_logging_config
+from typing import List
 from bson import ObjectId
 from deepface import DeepFace
 from fastapi import APIRouter, Form, HTTPException, Response
@@ -15,23 +17,11 @@ from pymongo import MongoClient
 
 from API.database import Database
 
-# Create a logger object
-logger = logging.getLogger(__name__)
-# Create a file handler
-handler = logging.FileHandler("log.log")
-handler.setLevel(logging.INFO)
-# Create a logging format
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
+init_logging_config()
 
 router = APIRouter()
 
-# To create connection with Mongodb
-# mongodb_uri = "mongodb://localhost:27017/"
-# port = 8000
-# client = MongoClient(mongodb_uri, port)
 
-# db = client["ImageDB"]
 client = Database()
 
 collection = "faceEntries"
@@ -43,14 +33,14 @@ class Employee(BaseModel):
     Name: str
     gender: str
     Department: str
-    Image: str
+    Images: List[str]
 
 
 class UpdateEmployee(BaseModel):
     Name: str
     gender: str
     Department: str
-    Image: str
+    Images: List[str]
 
 
 # To create new entries of employee
@@ -60,25 +50,29 @@ async def create_new_faceEntry(Employee: Employee):
     EmployeeCode = Employee.EmployeeCode
     gender = Employee.gender
     Department = Employee.Department
-    encoded_image = Employee.Image
+    encoded_images = Employee.Images
     time = datetime.now()
-    img_recovered = base64.b64decode(encoded_image)  # decode base64string
-    # print(img_recovered)
-    pil_image = Image.open(BytesIO(img_recovered))
-    image_filename = f"{Name}.png"
-    pil_image.save(image_filename)
-    # print path of the current working directory
-    pil_image.save(f"Images\dbImages\{Name}.jpg")
-    # Extract the face from the image
-    face_image_data = DeepFace.extract_faces(
-        image_filename, detector_backend="mtcnn", enforce_detection=False
-    )
-    # Calculate the embeddings of the face image
-    plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]["face"])
-    embeddings = DeepFace.represent(
-        image_filename, model_name="Facenet", detector_backend="mtcnn"
-    )
-    os.remove(image_filename)
+    
+    embeddings = []
+    for encoded_image in encoded_images:
+        img_recovered = base64.b64decode(encoded_image)  # decode base64string
+        # print(img_recovered)
+        pil_image = Image.open(BytesIO(img_recovered))
+        image_filename = f"{Name}.png"
+        pil_image.save(image_filename)
+        # print path of the current working directory
+        pil_image.save(f"Images\dbImages\{Name}.jpg")
+        # Extract the face from the image
+        face_image_data = DeepFace.extract_faces(
+            image_filename, detector_backend="mtcnn", enforce_detection=False
+        )
+        # Calculate the embeddings of the face image
+        plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]["face"])
+        embedding = DeepFace.represent(
+            image_filename, model_name="Facenet", detector_backend="mtcnn"
+        )
+        embeddings.append(embedding)
+        os.remove(image_filename)
     # Store the data in the database
     client.insert_one(
         collection,
@@ -89,12 +83,9 @@ async def create_new_faceEntry(Employee: Employee):
             "Department": Department,
             "time": time,
             "embeddings": embeddings,
-            "Image": encoded_image,
+            "Images": encoded_images,
         },
     )
-    # db.faceEntries.insert_one(
-
-    # )
     return {"message": "Face entry created successfully"}
 
 
@@ -108,7 +99,7 @@ async def get_employees():
             Name=employee.get("Name", "N/A"),
             gender=employee.get("gender", "N/A"),
             Department=employee.get("Department", "N/A"),
-            Image=employee.get("Image", "N/A"),
+            Images=employee.get("Images", "N/A"),
         )
         for employee in employees_mongo
     ]
@@ -119,7 +110,7 @@ async def get_employees():
 @router.get("/read/{EmployeeCode}", response_class=Response)
 async def read_employee(EmployeeCode: int):
     try:
-        # logger.info(f"Start {EmployeeCode}")
+        logging.info(f"Start {EmployeeCode}")
         items = client.find_one(
             collection,
             filter={"EmployeeCode": EmployeeCode},
@@ -127,7 +118,7 @@ async def read_employee(EmployeeCode: int):
                 "Name": True,
                 "gender": True,
                 "Department": True,
-                "Image": True,
+                "Images": True,
                 "_id": False,
             },
         )
