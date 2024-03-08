@@ -4,7 +4,6 @@ stages:
 
 default:
   image: python:3.9.18-slim-bullseye
-  retry: 2
 
 linting-job:
   stage: build
@@ -20,6 +19,7 @@ pytest-job:
   stage: test
   script:
     - echo "Running pytest... This will take about 1 minute."
+    - apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
     - pip install -r requirements.txt
     - pip install black isort flake8 pytest-cov
     - black .
