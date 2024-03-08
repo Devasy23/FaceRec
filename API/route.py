@@ -170,11 +170,14 @@ async def read_employee(EmployeeCode: int):
         print(e)
 
 
-# For updating existing record
+
 @router.put("/update/{EmployeeCode}", response_model=str)
 async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
     """
     Update employee information based on the provided EmployeeCode.
+    
+    Whenever user clicks on update employee button, in the frontend part, all the images will be visible - they can be deleted or new images can be added. 
+    Accordingly, the embeddings will be recalculated and updated in the database.
 
     Args:
         EmployeeCode (int): The unique code of the employee to be updated.
@@ -196,6 +199,25 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
         if not user_id:
             raise HTTPException(status_code=404, detail="Employee not found")
         Employee_data = Employee.model_dump(by_alias=True, exclude_unset=True)
+
+        # Calculate and store embeddings for the updated image array
+        encoded_images = Employee.Images
+        embeddings = []
+        for encoded_image in encoded_images:
+            img_recovered = base64.b64decode(encoded_image)  # decode base64string
+            pil_image = Image.open(BytesIO(img_recovered))
+            image_filename = f"{Employee.Name}.png"
+            pil_image.save(image_filename)
+            face_image_data = DeepFace.extract_faces(
+                image_filename, detector_backend="mtcnn", enforce_detection=False
+            )
+            embedding = DeepFace.represent(
+                image_filename, model_name="Facenet", detector_backend="mtcnn"
+            )
+            embeddings.append(embedding)
+            os.remove(image_filename)
+        Employee_data["embeddings"] = embeddings
+
         try:
             update_result = client.update_one(
                 collection,
@@ -209,7 +231,6 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
             raise HTTPException(status_code=500, detail="Internal server error")
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
-
 
 # To delete employee record
 @router.delete("/delete/{EmployeeCode}")
