@@ -1,3 +1,5 @@
+[![Python application](https://github.com/devansh-shah-11/FaceRec/actions/workflows/python-app.yml/badge.svg)](https://github.com/devansh-shah-11/FaceRec/actions/workflows/python-app.yml)
+[![CodeQL](https://github.com/devansh-shah-11/FaceRec/actions/workflows/codeql.yml/badge.svg)](https://github.com/devansh-shah-11/FaceRec/actions/workflows/codeql.yml)
 # Face Recognition Project
 
 This project uses Flask, FastAPI,DeepFace and MongoDB to create a Face recognition system. It allows users to register face with associated metadata, update their information and also can delete their data.
