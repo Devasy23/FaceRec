@@ -28,7 +28,7 @@ def test_face_lifecycle(
         "Name": "Devansh",
         "gender": "Male",
         "Department": "IT",
-        "Image": "encoded_string1",
+        "Images": ["encoded_string1", "encoded_string2"],
     }
 
     # Configure the mock to return the mock document when find() is called
@@ -46,7 +46,7 @@ def test_face_lifecycle(
             "Name": "Devansh",
             "gender": "Male",
             "Department": "IT",
-            "Image": encoded_string1,
+            "Images": [encoded_string1, encoded_string1],
         },
     )
     assert response1.status_code == 200
@@ -61,7 +61,7 @@ def test_face_lifecycle(
             "Name": "test",
             "gender": "Female",
             "Department": "IT",
-            "Image": encoded_string2,
+            "Images": [encoded_string2, encoded_string2],
         },
     )
     assert response2.status_code == 200
@@ -79,7 +79,7 @@ def test_face_lifecycle(
             "Name": "Test",
             "gender": "Male",
             "Department": "IT_Test",
-            "Image": "estring",
+            "Images": ["estring", "estring2"],
         },
     )
     assert response.status_code == 200

@@ -4,7 +4,7 @@ import logging
 import os
 from datetime import datetime
 from io import BytesIO
-from typing import List, Optional
+from typing import List
 
 from bson import ObjectId
 from deepface import DeepFace
@@ -15,25 +15,13 @@ from pydantic import BaseModel
 from pymongo import MongoClient
 
 from API.database import Database
+from API.utils import init_logging_config
 
-# Create a logger object
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-# Create a file handler
-handler = logging.FileHandler("log.log")
-handler.setLevel(logging.INFO)
-
-logger.addHandler(handler)
-logger.info("Logger created")
+init_logging_config()
 
 router = APIRouter()
 
-# To create connection with Mongodb
-# mongodb_uri = "mongodb://localhost:27017/"
-# port = 8000
-# client = MongoClient(mongodb_uri, port)
 
-# db = client["ImageDB"]
 client = Database()
 
 collection = "faceEntries"
@@ -52,65 +40,52 @@ class UpdateEmployee(BaseModel):
     Name: str
     gender: str
     Department: str
-    Image: str
+    Images: List[str]
 
 
 # To create new entries of employee
 @router.post("/create_new_faceEntry")
 async def create_new_faceEntry(Employee: Employee):
+    """
+    Create a new face entry for an employee.
+
+    Args:
+        Employee (Employee): The employee object containing the employee details.
+
+    Returns:
+        dict: A dictionary with a success message.
+
+    Raises:
+        None
+    """
     Name = Employee.Name
     EmployeeCode = Employee.EmployeeCode
     gender = Employee.gender
     Department = Employee.Department
-    encoded_image = Employee.Image
-    logger.info(f"Employee data: {Employee}")
-    try:
-        existing_Images = faceEntries.find_one(
-            {"EmployeeCode": EmployeeCode, "Name": Name, "Department": Department},
-            projection={"_id": False, "Images": True},
-        )
-        print("Existing Images: ", existing_Images)
-        if not existing_Images:
-            existing_Images = []
-    except Exception as e:
-        print("\n\n\nIn exception\n\n\n")
-        print(e)
-    try:
-        previous_Embeddings = faceEntries.find_one(
-            {"EmployeeCode": EmployeeCode, "Name": Name, "Department": Department},
-            projection={"_id": False, "embeddings": True},
-        )
-        print("Previous Embeddings: ", previous_Embeddings)
-        if not previous_Embeddings:
-            previous_Embeddings = []
-    except Exception as e:
-        print("\n\n\nIn exception\n\n\n")
-        print(e)
+    encoded_images = Employee.Images
     time = datetime.now()
-    img_recovered = base64.b64decode(encoded_image)  # decode base64string
-    # print(img_recovered)
-    pil_image = Image.open(BytesIO(img_recovered))
-    image_filename = f"{Name}.png"
-    pil_image.save(image_filename)
-    logger.info(f"Image saved: {image_filename}")
-    # print path of the current working directory
-    pil_image.save(f"Images\dbImages\{Name}.jpg")
-    # Extract the face from the image
-    face_image_data = DeepFace.extract_faces(
-        image_filename, detector_backend="mtcnn", enforce_detection=False
-    )
-    # Calculate the embeddings of the face image
-    plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]["face"])
-    embeddings = DeepFace.represent(
-        image_filename, model_name="Facenet", detector_backend="mtcnn"
-    )
-    logger.info(f"Embeddings calculated: {embeddings}")
-    os.remove(image_filename)
-    # Update previous images and embeddings
-    existing_Images = []
-    previous_Embeddings = []
-    existing_Images.append(encoded_image)
-    previous_Embeddings.append(embeddings)
+
+    embeddings = []
+    for encoded_image in encoded_images:
+        img_recovered = base64.b64decode(encoded_image)  # decode base64string
+        pil_image = Image.open(BytesIO(img_recovered))
+        logging.info(f"Image opened {Name}")
+        image_filename = f"{Name}.png"
+        pil_image.save(image_filename)
+        pil_image.save(f"Images\dbImages\{Name}.jpg")
+        face_image_data = DeepFace.extract_faces(
+            image_filename, detector_backend="mtcnn", enforce_detection=False
+        )
+        plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]["face"])
+        logging.info(f"Face saved {Name}")
+        embedding = DeepFace.represent(
+            image_filename, model_name="Facenet", detector_backend="mtcnn"
+        )
+        embeddings.append(embedding)
+        logging.info(f"Embedding created Embeddings for {Name}")
+        os.remove(image_filename)
+
+    logging.debug(f"About to insert Embeddings: {embeddings}")
     # Store the data in the database
     client.insert_one(
         collection,
@@ -121,18 +96,22 @@ async def create_new_faceEntry(Employee: Employee):
             "Department": Department,
             "time": time,
             "embeddings": embeddings,
-            "Images": encoded_image,
+            "Images": encoded_images,
         },
     )
-    # db.faceEntries.insert_one(
 
-    # )
     return {"message": "Face entry created successfully"}
 
 
 # To display all records
 @router.get("/Data/", response_model=list[Employee])
 async def get_employees():
+    """
+    Retrieve a list of employees from the database.
+
+    Returns:
+        list[Employee]: A list of Employee objects containing employee information.
+    """
     employees_mongo = client.find(collection)
     employees = [
         Employee(
@@ -140,7 +119,7 @@ async def get_employees():
             Name=employee.get("Name", "N/A"),
             gender=employee.get("gender", "N/A"),
             Department=employee.get("Department", "N/A"),
-            Image=employee.get("Image", "N/A"),
+            Images=employee.get("Images", "N/A"),
         )
         for employee in employees_mongo
     ]
@@ -150,8 +129,21 @@ async def get_employees():
 # To display specific record info
 @router.get("/read/{EmployeeCode}", response_class=Response)
 async def read_employee(EmployeeCode: int):
+    """
+    Retrieve employee information based on the provided EmployeeCode.
+
+    Args:
+        EmployeeCode (int): The unique code of the employee.
+
+    Returns:
+        Response: A response object containing the employee information in JSON format.
+
+    Raises:
+        HTTPException: If the employee is not found.
+
+    """
     try:
-        # logger.info(f"Start {EmployeeCode}")
+        logging.info(f"Start {EmployeeCode}")
         items = client.find_one(
             collection,
             filter={"EmployeeCode": EmployeeCode},
@@ -159,7 +151,7 @@ async def read_employee(EmployeeCode: int):
                 "Name": True,
                 "gender": True,
                 "Department": True,
-                "Image": True,
+                "Images": True,
                 "_id": False,
             },
         )
@@ -181,8 +173,22 @@ async def read_employee(EmployeeCode: int):
 # For updating existing record
 @router.put("/update/{EmployeeCode}", response_model=str)
 async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
+    """
+    Update employee information based on the provided EmployeeCode.
+
+    Args:
+        EmployeeCode (int): The unique code of the employee to be updated.
+        Employee (UpdateEmployee): The updated employee data.
+
+    Returns:
+        str: A message indicating the success of the update operation.
+
+    Raises:
+        HTTPException: If the employee with the given EmployeeCode is not found.
+        HTTPException: If no data was updated during the update operation.
+        HTTPException: If an internal server error occurs.
+    """
     try:
-        # logger.warning("Updating Start")
         user_id = client.find_one(
             collection, {"EmployeeCode": EmployeeCode}, projection={"_id": True}
         )
@@ -190,7 +196,6 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
         if not user_id:
             raise HTTPException(status_code=404, detail="Employee not found")
         Employee_data = Employee.model_dump(by_alias=True, exclude_unset=True)
-        # logger.info(f"Employee data to update: {Employee_data}")
         try:
             update_result = client.update_one(
                 collection,
@@ -201,16 +206,24 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
                 raise HTTPException(status_code=400, detail="No data was updated")
             return "Updated Successfully"
         except Exception as e:
-            # logger.error(f"Error while updating: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
     except Exception as e:
-        # logger.error(f"Error while fetching user_id: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # To delete employee record
 @router.delete("/delete/{EmployeeCode}")
 async def delete_employees(EmployeeCode: int):
+    """
+    Delete an employee from the collection based on the provided EmployeeCode.
+
+    Args:
+        EmployeeCode (int): The unique code of the employee to be deleted.
+
+    Returns:
+        dict: A dictionary containing a success message.
+
+    """
     print(EmployeeCode)
     client.find_one_and_delete(collection, {"EmployeeCode": EmployeeCode})
 
