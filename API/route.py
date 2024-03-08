@@ -46,6 +46,18 @@ class UpdateEmployee(BaseModel):
 # To create new entries of employee
 @router.post("/create_new_faceEntry")
 async def create_new_faceEntry(Employee: Employee):
+    """
+    Create a new face entry for an employee.
+
+    Args:
+        Employee (Employee): The employee object containing the employee details.
+
+    Returns:
+        dict: A dictionary with a success message.
+
+    Raises:
+        None
+    """
     Name = Employee.Name
     EmployeeCode = Employee.EmployeeCode
     gender = Employee.gender
@@ -56,23 +68,20 @@ async def create_new_faceEntry(Employee: Employee):
     embeddings = []
     for encoded_image in encoded_images:
         img_recovered = base64.b64decode(encoded_image)  # decode base64string
-        # print(img_recovered)
         pil_image = Image.open(BytesIO(img_recovered))
         image_filename = f"{Name}.png"
         pil_image.save(image_filename)
-        # print path of the current working directory
         pil_image.save(f"Images\dbImages\{Name}.jpg")
-        # Extract the face from the image
         face_image_data = DeepFace.extract_faces(
             image_filename, detector_backend="mtcnn", enforce_detection=False
         )
-        # Calculate the embeddings of the face image
         plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]["face"])
         embedding = DeepFace.represent(
             image_filename, model_name="Facenet", detector_backend="mtcnn"
         )
         embeddings.append(embedding)
         os.remove(image_filename)
+    
     # Store the data in the database
     client.insert_one(
         collection,
@@ -86,12 +95,19 @@ async def create_new_faceEntry(Employee: Employee):
             "Images": encoded_images,
         },
     )
+    
     return {"message": "Face entry created successfully"}
 
 
 # To display all records
 @router.get("/Data/", response_model=list[Employee])
 async def get_employees():
+    """
+    Retrieve a list of employees from the database.
+
+    Returns:
+        list[Employee]: A list of Employee objects containing employee information.
+    """
     employees_mongo = client.find(collection)
     employees = [
         Employee(
@@ -109,6 +125,19 @@ async def get_employees():
 # To display specific record info
 @router.get("/read/{EmployeeCode}", response_class=Response)
 async def read_employee(EmployeeCode: int):
+    """
+    Retrieve employee information based on the provided EmployeeCode.
+
+    Args:
+        EmployeeCode (int): The unique code of the employee.
+
+    Returns:
+        Response: A response object containing the employee information in JSON format.
+
+    Raises:
+        HTTPException: If the employee is not found.
+
+    """
     try:
         logging.info(f"Start {EmployeeCode}")
         items = client.find_one(
@@ -140,8 +169,22 @@ async def read_employee(EmployeeCode: int):
 # For updating existing record
 @router.put("/update/{EmployeeCode}", response_model=str)
 async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
+    """
+    Update employee information based on the provided EmployeeCode.
+
+    Args:
+        EmployeeCode (int): The unique code of the employee to be updated.
+        Employee (UpdateEmployee): The updated employee data.
+
+    Returns:
+        str: A message indicating the success of the update operation.
+
+    Raises:
+        HTTPException: If the employee with the given EmployeeCode is not found.
+        HTTPException: If no data was updated during the update operation.
+        HTTPException: If an internal server error occurs.
+    """
     try:
-        # logger.warning("Updating Start")
         user_id = client.find_one(
             collection, {"EmployeeCode": EmployeeCode}, projection={"_id": True}
         )
@@ -149,7 +192,6 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
         if not user_id:
             raise HTTPException(status_code=404, detail="Employee not found")
         Employee_data = Employee.model_dump(by_alias=True, exclude_unset=True)
-        # logger.info(f"Employee data to update: {Employee_data}")
         try:
             update_result = client.update_one(
                 collection,
@@ -160,16 +202,24 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
                 raise HTTPException(status_code=400, detail="No data was updated")
             return "Updated Successfully"
         except Exception as e:
-            # logger.error(f"Error while updating: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
     except Exception as e:
-        # logger.error(f"Error while fetching user_id: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # To delete employee record
 @router.delete("/delete/{EmployeeCode}")
 async def delete_employees(EmployeeCode: int):
+    """
+    Delete an employee from the collection based on the provided EmployeeCode.
+
+    Args:
+        EmployeeCode (int): The unique code of the employee to be deleted.
+
+    Returns:
+        dict: A dictionary containing a success message.
+
+    """
     print(EmployeeCode)
     client.find_one_and_delete(collection, {"EmployeeCode": EmployeeCode})
 
