@@ -15,7 +15,7 @@ deepface==0.0.81
 Deprecated==1.2.14
 dnspython==2.4.2
 exceptiongroup==1.2.0
-fastapi==0.108.0
+fastapi==0.109.1
 filelock==3.13.1
 fire==0.5.0
 Flask==3.0.0
