@@ -253,6 +253,16 @@ async def delete_employees(EmployeeCode: int):
         dict: A dictionary containing a success message.
 
     """
+    """
+    Delete an employee from the collection based on the provided EmployeeCode.
+
+    Args:
+        EmployeeCode (int): The unique code of the employee to be deleted.
+
+    Returns:
+        dict: A dictionary containing a success message.
+
+    """
     logging.info("Deleting Employee")
     logging.info(f"Deleting for EmployeeCode: {EmployeeCode}")
     client.find_one_and_delete(collection, {"EmployeeCode": EmployeeCode})

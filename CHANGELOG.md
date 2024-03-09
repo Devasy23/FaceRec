@@ -25,3 +25,12 @@
 ### Changed
 - Modified the `UpdateEmployee` models in [`route.py`](route/route.py) to include a list of images instead of a single image.
 - Adjusted the mock data and assertions for update data in [`test_face_cycle.py`](testing/test_face_cycle.py) to handle multiple images for each employee.
+
+## [0.1.2] - 2024-03-09 - 22:00
+
+### Changed
+- Merged code in [`route.py`](route/route.py) and [`test_face_cycle.py`](testing/test_face_cycle.py) to improve code organization and readability. Changes made by @Devasy23.
+- Split `test_face_lifecycle` function in [`test_face_cycle.py`](testing/test_face_cycle.py) into multiple smaller test cases that execute in a particularly specified order. Changes made by @Devasy23.
+
+### Fixed
+- Resolved issues in the test cases of [`test_face_cycle.py`](testing/test_face_cycle.py) to ensure they pass with the updated code structure. Fixes made by @Devasy23.

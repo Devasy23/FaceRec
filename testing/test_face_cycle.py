@@ -62,7 +62,7 @@ def test_face_lifecycle(
             "Name": "test",
             "gender": "Female",
             "Department": "IT",
-            "Images": [encoded_string2],
+            "Images": [encoded_string2, encoded_string2],
         },
     )
     assert response2.status_code == 200
