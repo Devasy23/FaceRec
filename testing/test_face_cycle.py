@@ -14,6 +14,7 @@ client = TestClient(router)
 @patch("API.database.Database.find_one")
 @patch("API.database.Database.find")
 @patch("API.database.Database.insert_one")
+
 def test_face_lifecycle(
     mock_insert_one: MagicMock,
     mock_find: MagicMock,
@@ -72,6 +73,9 @@ def test_face_lifecycle(
     assert response.status_code == 200
     assert len(response.json()) == 2
 
+    with open("./test-faces/devansh.jpg", "rb") as image_file:
+        encoded_string2 = base64.b64encode(image_file.read()).decode("utf-8")
+    
     # Update a face
     response = client.put(
         "/update/1",
@@ -79,7 +83,7 @@ def test_face_lifecycle(
             "Name": "Test",
             "gender": "Male",
             "Department": "IT_Test",
-            "Images": ["estring", "estring2"],
+            "Images": [encoded_string2, encoded_string2],
         },
     )
     assert response.status_code == 200
