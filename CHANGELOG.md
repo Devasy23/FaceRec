@@ -37,3 +37,16 @@
 
 ### Removed
 - Removed deprecated code from various modules to improve performance and maintainability. Changes made by @Devasy23.
+
+## [0.1.3] - 2024-03-10 - 00:51
+
+### Added
+- Created a new file [`test_face_endpoints.py`](testing/test_face_endpoints.py) to separately test each endpoint. Changes made by @Devasy23
+- Split the test cases in [`test_face_cycle.py`](testing/test_face_cycle.py) into smaller tests for each endpoint.
+- Added new dependencies to the [`requirements.txt`](requirements.txt) file to support the latest features and improvements.
+
+### Fixed
+- Resolved various bugs and issues identified during the testing process.
+
+### Removed
+- Removed deprecated code and unused dependencies from the project.
