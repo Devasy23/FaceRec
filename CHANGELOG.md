@@ -34,3 +34,6 @@
 
 ### Fixed
 - Resolved issues in the test cases of [`test_face_cycle.py`](testing/test_face_cycle.py) to ensure they pass with the updated code structure. Fixes made by @Devasy23.
+
+### Removed
+- Removed deprecated code from various modules to improve performance and maintainability. Changes made by @Devasy23.

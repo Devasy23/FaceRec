@@ -8,11 +8,10 @@ from typing import List
 
 from bson import ObjectId
 from deepface import DeepFace
-from fastapi import APIRouter, Form, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response
 from matplotlib import pyplot as plt
 from PIL import Image
 from pydantic import BaseModel
-from pymongo import MongoClient
 
 from API.database import Database
 from API.utils import init_logging_config
