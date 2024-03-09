@@ -174,13 +174,12 @@ async def read_employee(EmployeeCode: int):
         print(e)
 
 
-
 @router.put("/update/{EmployeeCode}", response_model=str)
 async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
     """
     Update employee information based on the provided EmployeeCode.
-    
-    Whenever user clicks on update employee button, in the frontend part, all the images will be visible - they can be deleted or new images can be added. 
+
+    Whenever user clicks on update employee button, in the frontend part, all the images will be visible - they can be deleted or new images can be added.
     Accordingly, the embeddings will be recalculated and updated in the database.
 
     Args:
@@ -239,6 +238,7 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
             raise HTTPException(status_code=500, detail="Internal server error")
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 # To delete employee record
 @router.delete("/delete/{EmployeeCode}")
