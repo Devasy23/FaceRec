@@ -8,11 +8,10 @@ from typing import List
 
 from bson import ObjectId
 from deepface import DeepFace
-from fastapi import APIRouter, Form, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response
 from matplotlib import pyplot as plt
 from PIL import Image
 from pydantic import BaseModel
-from pymongo import MongoClient
 
 from API.database import Database
 from API.utils import init_logging_config
@@ -122,7 +121,7 @@ async def get_employees():
             Name=employee.get("Name", "N/A"),
             gender=employee.get("gender", "N/A"),
             Department=employee.get("Department", "N/A"),
-            Images=employee.get("Images", "N/A"),
+            Images=employee.get("Images", []),
         )
         for employee in employees_mongo
     ]
@@ -227,7 +226,7 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
         try:
             update_result = client.update_one(
                 collection,
-                filter={"_id": ObjectId(user_id["_id"])},
+                {"_id": ObjectId(user_id["_id"])},
                 update={"$set": Employee_data},
             )
             logging.info(f"Update result {update_result}")
