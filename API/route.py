@@ -121,7 +121,7 @@ async def get_employees():
             Name=employee.get("Name", "N/A"),
             gender=employee.get("gender", "N/A"),
             Department=employee.get("Department", "N/A"),
-            Images=employee.get("Images", "N/A"),
+            Images=employee.get("Images", []),
         )
         for employee in employees_mongo
     ]
@@ -226,7 +226,7 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
         try:
             update_result = client.update_one(
                 collection,
-                filter={"_id": ObjectId(user_id["_id"])},
+                {"_id": ObjectId(user_id["_id"])},
                 update={"$set": Employee_data},
             )
             logging.info(f"Update result {update_result}")
