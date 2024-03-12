@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from pymongo import MongoClient
@@ -22,3 +23,9 @@ class Database:
 
     def update_one(self, collection, query, update):
         return self.db[collection].update_one(query, update)
+    def update_one(self, collection, query, update):
+        return self.db[collection].update_one(query, update)
+    @classmethod
+    def from_config(cls):
+        use_atlas = os.getenv('USE_ATLAS', 'False').lower() in ('true', '1', 't')
+        return cls(use_atlas=use_atlas)
