@@ -21,7 +21,7 @@ init_logging_config()
 router = APIRouter()
 
 
-client = Database()
+client = Database.from_config()
 
 collection = "faceEntries"
 
