@@ -1,10 +1,16 @@
+import os
 from datetime import datetime
 
 from pymongo import MongoClient
 
 
 class Database:
-    def __init__(self, uri="mongodb://localhost:27017/", db_name="ImageDB"):
+    def __init__(self, db_name="ImageDB"):
+        use_docker_db = os.environ.get('USE_DOCKER_DB', 'False') == 'True'
+        if use_docker_db:
+            uri = "mongodb://admin:password@localhost:27017/"
+        else:
+            uri = "mongodb://localhost:27017/"
         self.client = MongoClient(uri)
         self.db = self.client[db_name]
 
