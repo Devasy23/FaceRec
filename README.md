@@ -32,7 +32,25 @@ This project requires Python 3.7 or later.
 
 
 ### Running the Server
-To start FLask and FastAPI, run the given command:
+To run the application and MongoDB Atlas locally using Docker, follow these steps:
+
+1. Build and run the Docker container:
+    ```bash
+    docker-compose up --build
+    ```
+    This command builds the MongoDB container and runs it alongside your application.
+
+2. To switch between the local Docker-based MongoDB Atlas and the cloud version, set the `USE_DOCKER_DB` environment variable in your application's environment:
+    - For using the Docker-based MongoDB Atlas, set `USE_DOCKER_DB=True`.
+    - For using the cloud version of MongoDB Atlas, set `USE_DOCKER_DB=False`.
+
+3. To stop the Docker container, use the following command:
+    ```bash
+    docker-compose down
+    ```
+    This command stops and removes the containers, networks, and volumes created by `docker-compose up`.
+
+To start Flask and FastAPI without Docker, run the given command:
 ```bash
 python main.py
 ```
