@@ -1,10 +1,13 @@
 from datetime import datetime
+from config import DB_CONFIG
 
 from pymongo import MongoClient
 
 
 class Database:
-    def __init__(self, uri="mongodb://localhost:27017/", db_name="ImageDB"):
+    def __init__(self, uri=None, db_name=None):
+        uri = DB_CONFIG['atlas_uri'] if DB_CONFIG['USE_ATLAS'] else DB_CONFIG['local_uri']
+        db_name = db_name or DB_CONFIG['db_name']
         self.client = MongoClient(uri)
         self.db = self.client[db_name]
 

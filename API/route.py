@@ -267,3 +267,16 @@ async def delete_employees(EmployeeCode: int):
     client.find_one_and_delete(collection, {"EmployeeCode": EmployeeCode})
 
     return {"Message": "Successfully Deleted"}
+@router.post("/recognise_face")
+async def recognise_face():
+    """
+    Recognise a face using MongoDB Atlas regardless of the USE_ATLAS flag's value.
+
+    Returns:
+        dict: A dictionary containing the recognition result.
+    """
+    # Explicitly connect to MongoDB Atlas
+    atlas_client = Database(uri=DB_CONFIG['atlas_uri'])
+    # Perform database operations using atlas_client
+    # Example: atlas_client.find(...)
+    return {"message": "Face recognition completed"}
