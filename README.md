@@ -4,7 +4,7 @@ This project uses Flask, FastAPI,DeepFace and MongoDB to create a Face recogniti
 
 ### Get started
 
-These instructions will get you a copy of the project up and running on your local machine for development. 
+These instructions will guide you through setting up the project and configuring MongoDB Atlas for development. 
 
 ### Prerequisites
 
@@ -34,6 +34,7 @@ This project requires Python 3.7 or later.
 ### Running the Server
 To start FLask and FastAPI, run the given command:
 ```bash
+4. Set up MongoDB Atlas by following the instructions provided in the MongoDB documentation. Store your MongoDB Atlas connection string securely, preferably in environment variables or a configuration file.
 python main.py
 ```
 
@@ -46,15 +47,11 @@ python main.py
 
 ## Database Schema
 
-1. Create new connection in MongoDB and Connect using given url
-   `URL: mongodb://localhost:27017/8000`
+1. To migrate your local MongoDB data to MongoDB Atlas, first create a MongoDB Atlas account and set up a cluster.
 
-2.  Create database using 
-    Database name: `DatabaseName`
-    Collection name: `CollectionName`
+2. Use the MongoDB Atlas Data Import tool to migrate your data from the local MongoDB instance to your MongoDB Atlas cluster.
 
-3.  Add data by importing json file:
-    From 'database.mongo' folder -> `{DatabaseName}.{CollectionName}.json`
+3. Update your application's connection string to point to your MongoDB Atlas cluster. Securely store the MongoDB Atlas connection string.
 
 The database contains a `faceEntries` collection with the following schema:
 
@@ -79,6 +76,7 @@ The database contains a `faceEntries` collection with the following schema:
 
 5. `delete()` : This function is used to delete the specific Employee Data.
 
+To switch between using the local MongoDB instance and MongoDB Atlas, adjust the `use_cloud_db` parameter when instantiating the `Database` class. Set `use_cloud_db=True` to use MongoDB Atlas, or `use_cloud_db=False` to use the local MongoDB instance. This allows for flexible database access configuration depending on your environment or testing needs.
 ## Testing
 
 To run the tests, use the following command:

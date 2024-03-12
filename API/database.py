@@ -4,7 +4,9 @@ from pymongo import MongoClient
 
 
 class Database:
-    def __init__(self, uri="mongodb://localhost:27017/", db_name="ImageDB"):
+    def __init__(self, uri="mongodb://localhost:27017/", db_name="ImageDB", use_cloud_db=False):
+        if use_cloud_db:
+            uri = "your_mongodb_atlas_connection_string_here"  # Replace with your actual MongoDB Atlas connection string
         self.client = MongoClient(uri)
         self.db = self.client[db_name]
 
@@ -22,3 +24,5 @@ class Database:
 
     def update_one(self, collection, query, update):
         return self.db[collection].update_one(query, update)
+        self.client = MongoClient(uri)
+        self.db = self.client[db_name]

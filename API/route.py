@@ -174,7 +174,7 @@ async def read_employee(EmployeeCode: int):
 
 
 @router.put("/update/{EmployeeCode}", response_model=str)
-async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
+async def update_employees(EmployeeCode: int, Employee: UpdateEmployee, use_cloud_db: bool = False):
     """
     Update employee information based on the provided EmployeeCode.
 
@@ -227,6 +227,7 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
             update_result = client.update_one(
                 collection,
                 {"_id": ObjectId(user_id["_id"])},
+    client = Database(use_cloud_db=use_cloud_db)
                 update={"$set": Employee_data},
             )
             logging.info(f"Update result {update_result}")
