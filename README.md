@@ -46,10 +46,9 @@ python main.py
 
 ## Database Schema
 
-1. Create new connection in MongoDB and Connect using given url
-   `URL: mongodb://localhost:27017/8000`
-
-2.  Create database using 
+1. Configure your database connection in `API/config.py`:
+    - For local MongoDB, set `"local": "mongodb://localhost:27017/"` in the `DB_CONFIG` dictionary.
+    - For MongoDB Atlas, replace `<Your MongoDB Atlas connection string here>` with your actual MongoDB Atlas connection string in the `DB_CONFIG` dictionary.
     Database name: `DatabaseName`
     Collection name: `CollectionName`
 
@@ -90,3 +89,12 @@ pytest
 ## License
 
 This project is licensed under the APACHE License - see the [LICENSE](LICENSE) file for details.
+## Dual Database Setup
+
+This project supports using both a local MongoDB instance and MongoDB Atlas for database operations. This flexibility allows for easy switching between a local database for development and a cloud-based database for production or testing purposes.
+
+To switch between the local MongoDB and MongoDB Atlas, instantiate the `Database` class with the `use_atlas` parameter set accordingly:
+- For local MongoDB, use `Database(use_atlas=False)`.
+- For MongoDB Atlas, use `Database(use_atlas=True)`.
+
+Note: The `recognise_face()` API endpoint is configured to exclusively use MongoDB Atlas due to its reliance on cloud-specific features.

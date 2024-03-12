@@ -195,6 +195,7 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
     """
     logging.info(f"Updating for EmployeeCode: {EmployeeCode}")
     try:
+        client = Database(use_atlas=True)
         user_id = client.find_one(
             collection, {"EmployeeCode": EmployeeCode}, projection={"_id": True}
         )
