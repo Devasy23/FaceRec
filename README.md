@@ -24,7 +24,10 @@ This project requires Python 3.7 or later.
     cd FaceRec
     ```
 
-3. Install the required packages:
+4. Set up environment variables for MongoDB Atlas:
+    - `MONGODB_ATLAS_URI`: Set this variable to your MongoDB Atlas connection string.
+
+5. Install the required packages:
 
     ```bash
     pip install -r requirements.txt
@@ -48,7 +51,6 @@ python main.py
 
 1. Create new connection in MongoDB and Connect using given url
    `URL: mongodb://localhost:27017/8000`
-
 2.  Create database using 
     Database name: `DatabaseName`
     Collection name: `CollectionName`
@@ -59,6 +61,7 @@ python main.py
 The database contains a `faceEntries` collection with the following schema:
 
 - `id`: A unique identifier for the face entry.
+Note: This project now supports both local MongoDB and MongoDB Atlas. The `recognise_face()` endpoint exclusively uses MongoDB Atlas for its operations.
 - `Employeecode`: A unique  employee ID associated with the image.
 - `Name`: The name of the person in the image.
 - `gender`: The gender of the person.
@@ -90,3 +93,6 @@ pytest
 ## License
 
 This project is licensed under the APACHE License - see the [LICENSE](LICENSE) file for details.
+## Configuration
+
+To configure the project to use either local MongoDB or MongoDB Atlas, refer to the `config.py` file. You can set the `USE_ATLAS` environment variable to `True` to use MongoDB Atlas or `False` to use a local MongoDB instance. Ensure the `MONGODB_ATLAS_URI` is set correctly in your environment variables if you choose to use MongoDB Atlas.
