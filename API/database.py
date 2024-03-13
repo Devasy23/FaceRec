@@ -22,3 +22,29 @@ class Database:
 
     def update_one(self, collection, query, update):
         return self.db[collection].update_one(query, update)
+    def find_similar_vectors(self, collection, embedding, n):
+        """
+        Find the top n most similar vectors in the database to the given embedding.
+        :param collection: The MongoDB collection to search in.
+        :param embedding: The input vector.
+        :param n: The number of top similar vectors to return.
+        :return: The top n most similar vectors from the database.
+        """
+        pipeline = [
+            {
+                "$addFields": {
+                    "distance": {
+                        "$sqrt": {
+                            "$reduce": {
+                                "input": {"$zip": {"inputs": ["$embedding", embedding]}},
+                                "initialValue": 0,
+                                "in": {"$add": ["$$value", {"$pow": [{"$subtract": ["$$this.0", "$$this.1"]}, 2]}]}
+                            }
+                        }
+                    }
+                }
+            },
+            {"$sort": {"distance": 1}},
+            {"$limit": n}
+        ]
+        return list(self.db[collection].aggregate(pipeline))
