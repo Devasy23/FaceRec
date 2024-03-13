@@ -267,3 +267,23 @@ async def delete_employees(EmployeeCode: int):
     client.find_one_and_delete(collection, {"EmployeeCode": EmployeeCode})
 
     return {"Message": "Successfully Deleted"}
+@router.post("/recognise_face")
+async def recognise_face(embedding: List[float], n: int):
+    """
+    Recognise a face by finding the most similar face embeddings in the database.
+
+    Args:
+        embedding (List[float]): The embedding vector of the face to be recognised.
+        n (int): The number of top similar vectors to return.
+
+    Returns:
+        dict: A dictionary containing the top n most similar face embeddings.
+
+    """
+    logging.info("Recognising face")
+    try:
+        similar_faces = client.find_similar_vectors(collection, embedding, n)
+        return {"similar_faces": similar_faces}
+    except Exception as e:
+        logging.error(f"Error recognising face: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
