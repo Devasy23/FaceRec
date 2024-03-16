@@ -290,17 +290,17 @@ async def recognize_face(Face: UploadFile = File(...)):
     """
     logging.info("Recognizing Face")
     try:
-        img_recovered = await Face.read()
-        pil_image = Image.open(BytesIO(img_recovered))
-        image_filename = "temp.png"
-        pil_image.save(image_filename)
+        img_data = await Face.read()
+        with open("temp.png", "wb") as f:
+            f.write(img_data)
 
-        embedding = DeepFace.represent(img_path=image_filename, model_name="Facenet")
-        result = client2.vector_search(collection2, embedding)
+        embedding = DeepFace.represent(img_path="temp.png", model_name="Facenet")
+        result = client2.vector_search(collection2, embedding[0]['embedding'])
         logging.info(f"Result: {result}")
-        
+        os.remove("temp.png")
     except Exception as e:
         logging.error(f"Error: {e}")
+        os.remove("temp.png")
         raise HTTPException(status_code=500, detail="Internal server error")
     return Response(
         content=bytes(json.dumps(result[0], default=str), "utf-8"),

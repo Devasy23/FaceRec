@@ -46,4 +46,5 @@ class Database:
                 }
             }
             ])
-        return result
+        result_arr = [i for i in result]
+        return result_arr
