@@ -22,3 +22,28 @@ class Database:
 
     def update_one(self, collection, query, update):
         return self.db[collection].update_one(query, update)
+    
+    # add a function for pipeline aggregation vector search
+    def vector_search(self, collection, embedding):
+        
+        result = self.db[collection].aggregate([
+            {
+                "$vectorSearch": {
+                "index": "vector_index",
+                "path": "face_embedding",
+                "queryVector": embedding,
+                "numCandidates": 20,
+                "limit": 20
+                }
+            }, {
+                '$project': {
+                '_id': 0, 
+                'Name': 1,
+                'Image': 1,
+                'score': {
+                    '$meta': 'vectorSearchScore'
+                    }
+                }
+            }
+            ])
+        return result

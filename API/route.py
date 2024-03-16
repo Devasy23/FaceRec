@@ -8,22 +8,27 @@ from typing import List
 
 from bson import ObjectId
 from deepface import DeepFace
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, UploadFile, File
 from matplotlib import pyplot as plt
 from PIL import Image
 from pydantic import BaseModel
 
 from API.database import Database
 from API.utils import init_logging_config
+from dotenv import load_dotenv
 
+load_dotenv()
 init_logging_config()
 
+MONGO_URI = os.getenv("MONGO_URL1")
 router = APIRouter()
 
 
 client = Database()
+client2 = Database(MONGO_URI, "FaceRec")
 
 collection = "faceEntries"
+collection2 = "ImageDB"
 
 
 # Models  for the data to be sent and received by the server
@@ -267,3 +272,37 @@ async def delete_employees(EmployeeCode: int):
     client.find_one_and_delete(collection, {"EmployeeCode": EmployeeCode})
 
     return {"Message": "Successfully Deleted"}
+
+
+@router.post("/recognize_face", response_class=Response)
+async def recognize_face(Face: UploadFile = File(...)):
+    """
+    Recognize a face from the provided image.
+
+    Args:
+        Face (UploadFile): The image file to be recognized.
+
+    Returns:
+        Response: A response object containing the recognized employee information in JSON format.
+
+    Raises:
+        HTTPException: If an internal server error occurs.
+    """
+    logging.info("Recognizing Face")
+    try:
+        img_recovered = await Face.read()
+        pil_image = Image.open(BytesIO(img_recovered))
+        image_filename = "temp.png"
+        pil_image.save(image_filename)
+
+        embedding = DeepFace.represent(img_path=image_filename, model_name="Facenet")
+        result = client2.vector_search(collection2, embedding)
+        logging.info(f"Result: {result}")
+        
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+    return Response(
+        content=bytes(json.dumps(result[0], default=str), "utf-8"),
+        media_type="application/json",
+    )
