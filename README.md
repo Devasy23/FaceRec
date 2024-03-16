@@ -78,7 +78,42 @@ The database contains a `faceEntries` collection with the following schema:
 4. `read()` : This function sent a GET request with specific Employeecode to read the information related to that particular Employeecode.
 
 5. `delete()` : This function is used to delete the specific Employee Data.
+## Local MongoDB Atlas Setup Using Docker
 
+To facilitate development and testing, you can run MongoDB Atlas locally using Docker. This setup mimics the cloud environment and allows for easy switching between local and cloud databases.
+
+### Initial Setup
+
+1. Ensure Docker is installed on your system. If not, download and install Docker from [Docker's official website](https://www.docker.com/products/docker-desktop).
+
+2. Navigate to the `API` directory where the `Dockerfile` and `docker-compose.yml` files are located.
+
+3. Build and run the Docker container with the following command:
+    ```bash
+    docker-compose up --build
+    ```
+    This command builds the MongoDB image and runs it as a container. The MongoDB service will be accessible on `localhost:27017`.
+
+### Switching Between Local and Cloud MongoDB Atlas
+
+To switch between the local MongoDB instance and a cloud MongoDB Atlas instance, modify the initialization of the `Database` class in `API/database.py`.
+
+- For local MongoDB, set `use_local` to `True`:
+    ```python
+    db = Database(db_name="YourDatabaseName", use_local=True)
+    ```
+
+- For cloud MongoDB Atlas, set `use_local` to `False` and replace `"your_cloud_mongodb_atlas_uri"` with your actual MongoDB Atlas URI:
+    ```python
+    db = Database(db_name="YourDatabaseName", use_local=False)
+    ```
+
+### Troubleshooting
+
+- If you encounter any issues with the Docker container, ensure Docker is running and try rebuilding the container.
+- For connection issues, verify that the MongoDB URI in `API/database.py` is correctly set according to your setup (local or cloud).
+
+This setup allows for a flexible development environment, closely mirroring the production setup without the need for external MongoDB hosting during development.
 ## Testing
 
 To run the tests, use the following command:

@@ -4,7 +4,8 @@ from pymongo import MongoClient
 
 
 class Database:
-    def __init__(self, uri="mongodb://localhost:27017/", db_name="ImageDB"):
+    def __init__(self, db_name="ImageDB", use_local=False):
+        uri = "mongodb://localhost:27017/" if use_local else "your_cloud_mongodb_atlas_uri"
         self.client = MongoClient(uri)
         self.db = self.client[db_name]
 
