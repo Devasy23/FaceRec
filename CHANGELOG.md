@@ -50,3 +50,16 @@
 
 ### Removed
 - Removed deprecated code and unused dependencies from the project.
+
+## [0.1.4] - 2024-03-16 - 23:00
+
+### Added
+- Implemented a new `recognize_Face` endpoint in [`route.py`](API/route.py). This endpoint accepts a base64 string as input, converts it into embeddings, and performs a vector search query on the MongoDB Atlas database. Changes made by @Devasy23.
+- Added a new `vector_search` function in [`database.py`](API/database.py). This function performs a vector similarity search on the MongoDB Atlas database using Euclidean distance as the similarity measure. Changes made by @Devasy23.
+- Updated [`index.ipynb`](index.ipynb) to include examples and usage of the new `recognize_Face` endpoint and `vector_search` function. Changes made by @Devasy23.
+
+### Changed
+- Updated the `Database` class in [`database.py`](API/database.py) to include the new `vector_search` function. Changes made by @Devasy23.
+
+### Fixed
+- Resolved various bugs and issues identified during the implementation and testing of the new features. Fixes made by @Devasy23.
