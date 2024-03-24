@@ -30,7 +30,7 @@ The primary objective of Phase-I was to assemble a comprehensive dataset for tra
 
 **Collaboration with Development Team:**
 To ensure seamless collaboration between our team and the development team responsible for frontend and backend tasks (80%), the following tasks and responsibilities have been outlined:
-- **Data Capturing:** 
+- **Data Capturing:**
    - Verify the setup and standardize the format
    - Set up the entire system to capture images of all the subjects
 - **Data Storage and Processing:**
@@ -82,7 +82,7 @@ This phase is pivotal for the project, focusing on creating a robust and effecti
 
 #### Key Tasks and Innovations:
 
-1. **Triplet Loss Function Implementation**: 
+1. **Triplet Loss Function Implementation**:
    - Utilizing Triplet Loss as the cornerstone of our model to enhance the accuracy in distinguishing between different individuals.
    - This involves crafting a training strategy that effectively verifies the similarity between the vector embeddings of faces.
 
@@ -132,5 +132,5 @@ Following the successful completion of Phase-III, the project will proceed to su
 
 #### Phase-VI: Scaling the System
 - **Deliverables**: A strategic plan for scaling the system to accommodate a growing number of users and data. This will involve scalable cloud services, database expansion plans, and computational resource management.
-- This phase involves planning for how to scale the FaceRec System if it is successful. This includes considering factors such as the number of users, the amount of data, and the computational requirements. 
+- This phase involves planning for how to scale the FaceRec System if it is successful. This includes considering factors such as the number of users, the amount of data, and the computational requirements.
 - The deadline for this phase is June.
