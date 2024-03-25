@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import base64
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
@@ -9,11 +12,11 @@ from API.route import router
 client = TestClient(router)
 
 
-@patch("API.database.Database.find_one_and_delete")
-@patch("API.database.Database.update_one")
-@patch("API.database.Database.find_one")
-@patch("API.database.Database.find")
-@patch("API.database.Database.insert_one")
+@patch('API.database.Database.find_one_and_delete')
+@patch('API.database.Database.update_one')
+@patch('API.database.Database.find_one')
+@patch('API.database.Database.find')
+@patch('API.database.Database.insert_one')
 def test_face_lifecycle(
     mock_insert_one: MagicMock,
     mock_find: MagicMock,
@@ -23,87 +26,87 @@ def test_face_lifecycle(
 ):
     # Register two new faces
     mock_doc = {
-        "_id": "65e6284d01f95cd96ea334a7",
-        "EmployeeCode": "1",
-        "Name": "Devansh",
-        "gender": "Male",
-        "Department": "IT",
-        "Images": ["encoded_string1", "encoded_string2"],
+        '_id': '65e6284d01f95cd96ea334a7',
+        'EmployeeCode': '1',
+        'Name': 'Devansh',
+        'gender': 'Male',
+        'Department': 'IT',
+        'Images': ['encoded_string1', 'encoded_string2'],
     }
 
     # Configure the mock to return the mock document when find() is called
     mock_find.return_value = [mock_doc, mock_doc]
-    mock_insert_one.return_value = MagicMock(inserted_id="1")
+    mock_insert_one.return_value = MagicMock(inserted_id='1')
     mock_find_one.return_value = mock_doc
     mock_update_one.return_value = MagicMock(modified_count=1)
     mock_find_one_and_delete.return_value = mock_doc
-    with open("./test-faces/devansh.jpg", "rb") as image_file:
-        encoded_string1 = base64.b64encode(image_file.read()).decode("utf-8")
+    with open('./test-faces/devansh.jpg', 'rb') as image_file:
+        encoded_string1 = base64.b64encode(image_file.read()).decode('utf-8')
     response1 = client.post(
-        "/create_new_faceEntry",
+        '/create_new_faceEntry',
         json={
-            "EmployeeCode": "1",
-            "Name": "Devansh",
-            "gender": "Male",
-            "Department": "IT",
-            "Images": [encoded_string1, encoded_string1],
+            'EmployeeCode': '1',
+            'Name': 'Devansh',
+            'gender': 'Male',
+            'Department': 'IT',
+            'Images': [encoded_string1, encoded_string1],
         },
     )
     assert response1.status_code == 200
-    assert response1.json() == {"message": "Face entry created successfully"}
+    assert response1.json() == {'message': 'Face entry created successfully'}
 
-    with open("./test-faces/devansh.jpg", "rb") as image_file:
-        encoded_string2 = base64.b64encode(image_file.read()).decode("utf-8")
+    with open('./test-faces/devansh.jpg', 'rb') as image_file:
+        encoded_string2 = base64.b64encode(image_file.read()).decode('utf-8')
     response2 = client.post(
-        "/create_new_faceEntry",
+        '/create_new_faceEntry',
         json={
-            "EmployeeCode": "2",
-            "Name": "test",
-            "gender": "Female",
-            "Department": "IT",
-            "Images": [encoded_string2, encoded_string2],
+            'EmployeeCode': '2',
+            'Name': 'test',
+            'gender': 'Female',
+            'Department': 'IT',
+            'Images': [encoded_string2, encoded_string2],
         },
     )
     assert response2.status_code == 200
-    assert response2.json() == {"message": "Face entry created successfully"}
+    assert response2.json() == {'message': 'Face entry created successfully'}
 
     # Get all data
-    response = client.get("/Data/")
+    response = client.get('/Data/')
     assert response.status_code == 200
     assert len(response.json()) == 2
 
-    with open("./test-faces/devansh.jpg", "rb") as image_file:
-        encoded_string2 = base64.b64encode(image_file.read()).decode("utf-8")
+    with open('./test-faces/devansh.jpg', 'rb') as image_file:
+        encoded_string2 = base64.b64encode(image_file.read()).decode('utf-8')
 
     # Update a face
     response = client.put(
-        "/update/1",
+        '/update/1',
         json={
-            "Name": "Test",
-            "gender": "Male",
-            "Department": "IT_Test",
-            "Images": [encoded_string2, encoded_string2],
+            'Name': 'Test',
+            'gender': 'Male',
+            'Department': 'IT_Test',
+            'Images': [encoded_string2, encoded_string2],
         },
     )
     assert response.status_code == 200
-    assert response.json() == "Updated Successfully"
+    assert response.json() == 'Updated Successfully'
 
     # Get all data again
-    response = client.get("/Data/")
+    response = client.get('/Data/')
     assert response.status_code == 200
     assert len(response.json()) == 2
 
     # Delete a face
-    response = client.delete("/delete/1")
+    response = client.delete('/delete/1')
     assert response.status_code == 200
-    assert response.json() == {"Message": "Successfully Deleted"}
+    assert response.json() == {'Message': 'Successfully Deleted'}
 
     # Check that only one face remains
-    response = client.get("/Data/")
+    response = client.get('/Data/')
     assert response.status_code == 200
     # assert len(response.json()) == 1
 
     # Delete the remaining face
-    response = client.delete("/delete/2")
+    response = client.delete('/delete/2')
     assert response.status_code == 200
-    assert response.json() == {"Message": "Successfully Deleted"}
+    assert response.json() == {'Message': 'Successfully Deleted'}

@@ -9,7 +9,7 @@
 - [ ] Info
 - [ ] Bug
 - [ ] Documentation
-- [ ] Other (please specify): 
+- [ ] Other (please specify):
 
 ## Description
 <!-- Describe the issue in detail. What problem are you experiencing or what feature would you like to see added? -->
@@ -23,18 +23,18 @@
 
 ## Steps to Reproduce
 <!-- If applicable, provide a step-by-step guide to reproducing the issue -->
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Screenshots / Code Snippets (if applicable)
 <!-- Include any relevant screenshots or code snippets that can help understand the issue better -->
 
 ## Environment
 <!-- Provide details about your environment -->
-- Operating System: 
-- Browser (if applicable): 
-- Version/Commit ID (if applicable): 
+- Operating System:
+- Browser (if applicable):
+- Version/Commit ID (if applicable):
 
 ## Possible Solution (if you have any in mind)
 <!-- If you have an idea about how to fix the issue, please share it here -->

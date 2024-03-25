@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from pymongo import MongoClient
 
 
 class Database:
-    def __init__(self, uri="mongodb://localhost:27017/", db_name="ImageDB"):
+    def __init__(self, uri='mongodb://localhost:27017/', db_name='ImageDB'):
         self.client = MongoClient(uri)
         self.db = self.client[db_name]
 
