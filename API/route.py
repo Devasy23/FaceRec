@@ -296,8 +296,10 @@ async def recognize_face(Face: UploadFile = File(...)):
 
         embedding = DeepFace.represent(img_path="temp.png", model_name="Facenet")
         result = client2.vector_search(collection2, embedding[0]['embedding'])
-        logging.info(f"Result: {result}")
+        logging.info(f"Result: {result[0]['Name']}, {result[0]['score']}")
         os.remove("temp.png")
+        if result[0]['score'] < 0.5:
+            return Response(status_code=404, content=json.dumps({"message": "No match found"}))
     except Exception as e:
         logging.error(f"Error: {e}")
         os.remove("temp.png")
