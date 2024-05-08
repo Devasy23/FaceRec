@@ -31,7 +31,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Provided by GitHub Actions, no need for custom PAT unless required
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # SonarCloud secret token
-        # with:
-        #   args: >
-        #     -Dsonar.projectKey=Devasy23_FaceRec
-        #     -Dsonar.organization=devasy23
