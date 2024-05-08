@@ -4,10 +4,12 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
+  contents: read
+  security-events: write
   pull-requests: read # allows SonarCloud to decorate PRs with analysis results
 
 jobs:
@@ -15,17 +17,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Analyze with SonarCloud
-
-        # You can pin the exact commit or the version.
-        # uses: SonarSource/sonarcloud-github-action@de2e56b42aa84d0b1c5b622644ac17e505c9a049
-        uses: SonarSource/sonarcloud-github-action@de2e56b42aa84d0b1c5b622644ac17e505c9a049
+        uses: sonarsource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.C_PAT }}  # Needed to get PR information
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Generate a token on Sonarcloud.io, add it to the secrets of this repo with the name SONAR_TOKEN (Settings > Secrets > Actions > add new repository secret)
-        with:
-          # Additional arguments for the sonarcloud scanner
-          args:
-            -Dsonar.projectKey=
-            -Dsonar.organization=
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Provided by GitHub Actions, no need for custom PAT unless required
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # SonarCloud secret token
