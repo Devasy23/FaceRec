@@ -84,7 +84,7 @@ async def create_new_faceEntry(Employee: Employee):
         plt.imsave(f"Images/Faces/{Name}.jpg", face_image_data[0]["face"])
         logging.info(f"Face saved {Name}")
         embedding = DeepFace.represent(
-            image_filename, model_name="Facenet", detector_backend="mtcnn"
+            image_filename, model_name="Facenet512", detector_backend="mtcnn"
         )
         embeddings.append(embedding)
         logging.info(f"Embedding created Embeddings for {Name}")
@@ -92,8 +92,8 @@ async def create_new_faceEntry(Employee: Employee):
 
     logging.debug(f"About to insert Embeddings: {embeddings}")
     # Store the data in the database
-    client.insert_one(
-        collection,
+    client2.insert_one(
+        collection2,
         {
             "EmployeeCode": EmployeeCode,
             "Name": Name,
@@ -294,7 +294,7 @@ async def recognize_face(Face: UploadFile = File(...)):
         with open("temp.png", "wb") as f:
             f.write(img_data)
 
-        embedding = DeepFace.represent(img_path="temp.png", model_name="Facenet")
+        embedding = DeepFace.represent(img_path="temp.png", model_name="Facenet512", detector_backend="mtcnn")
         result = client2.vector_search(collection2, embedding[0]['embedding'])
         logging.info(f"Result: {result[0]['Name']}, {result[0]['score']}")
         os.remove("temp.png")
