@@ -20,7 +20,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.C_PAT }}  # Needed to get PR information
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          
         with:
-          args:
-            -Dsonar.projectKey=Devasy23_FaceRec
-            -Dsonar.organization=devasy23
+          args: -Dsonar.projectKey=Devasy23_FaceRec -Dsonar.organization=devasy23
