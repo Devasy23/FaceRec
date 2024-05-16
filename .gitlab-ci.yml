@@ -25,6 +25,7 @@ pytest-job:
     - black .
     - pytest --junitxml=pytest.xml
     - pytest --cov --cov-report term --cov-report xml:coverage.xml
+    - ls -la  # List files to check if coverage.xml is present
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
