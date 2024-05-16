@@ -27,7 +27,7 @@ linting-job:
     - flake8 . || echo "Linting check failed but allowed to continue"
 
 pytest-job:
-  stage: test
+  stage: build  # Change stage to 'build' to run in parallel with linting-job
   script:
     - echo "Running pytest... This will take about 1 minute."
     - apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
