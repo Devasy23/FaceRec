@@ -14,7 +14,8 @@ before_script:
   - python -m venv venv  # Create a virtual environment
   - source venv/bin/activate  # Activate virtual environment
   - pip install --upgrade pip  # Upgrade pip
-  - pip install -r requirements.txt  # Install requirements
+  - pip install uv
+  - uv pip install -r requirements.txt  # Install requirements
 
 linting-job:
   stage: build
@@ -30,7 +31,7 @@ pytest-job:
   script:
     - echo "Running pytest... This will take about 1 minute."
     - apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
-    - pip install pytest-cov  # Install testing tools
+    - uv pip install pytest-cov  # Install testing tools
     - black .
     - pytest --junitxml=pytest.xml || true  # Ensure that tests run to completion
     - pytest --cov --cov-report term --cov-report xml:coverage.xml || true
