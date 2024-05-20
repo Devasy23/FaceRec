@@ -5,14 +5,14 @@ import os
 import cv2
 from flask import Blueprint
 from flask import Response as flask_response
-from flask import redirect, render_template, request,jsonify
+from flask import redirect, render_template, request
 from PIL import Image
 import requests
  
 from FaceRec.config import Config
  
-employee_blueprint = Blueprint(
-    "employee_blueprint",
+Edit_blueprint = Blueprint(
+    "Edit_blueprint",
     __name__,
     template_folder="../../templates/",
     static_folder="../../static/",
@@ -39,7 +39,7 @@ def display_live_video():
  
  
 # Route for displaying video
-@employee_blueprint.route("/video_feed")
+@Edit_blueprint.route("/video_feed")
 def video_feed():
     return flask_response(
         display_live_video(), mimetype="multipart/x-mixed-replace;boundary=frame"
@@ -47,7 +47,7 @@ def video_feed():
  
  
 # Route for capturing image from video
-@employee_blueprint.route("/capture", methods=["GET", "POST"])
+@Edit_blueprint.route("/capture", methods=["GET", "POST"])
 def capture():
     global EmployeeCode
     global Name
@@ -68,7 +68,7 @@ def capture():
  
  
 # Route to display captured image
-@employee_blueprint.route("/Image", methods=["GET"])
+@Edit_blueprint.route("/Image", methods=["GET"])
 def display_image():
     if os.path.exists(Config.image_data_file):
         with open(Config.image_data_file, "r") as file:
@@ -94,50 +94,39 @@ def display_image():
     print("done")
     return render_template("index.html", image_path=image_path)
  
-#Below route are of Recognition
- 
-@employee_blueprint.route("/capturing", methods=["GET", "POST"])
-def capturing():
-    ret, frame = cap.read(True)
-    frame = cv2.flip(frame, 1)
-    _, buffer = cv2.imencode(".jpg", frame)
-    encoded_image = base64.b64encode(buffer).decode("utf-8")
-    with open(Config.image_data_file, "w") as file:
-        json.dump({"base64_image": encoded_image}, file)
-    return redirect("Pic")
- 
-# Route to display captured image
-@employee_blueprint.route("/Pic", methods=["GET","POST"])
-def display_pic():
-    if os.path.exists(Config.image_data_file):
+@Edit_blueprint.route("/edit/<int:EmployeeCode>", methods=["POST", "GET"])
+def edit(EmployeeCode):
+    if request.method == "POST":
+        Name = request.form["Name"]
+        gender = request.form["Gender"]
+        Department = request.form["Department"]
         with open(Config.image_data_file, "r") as file:
             image_data = json.load(file)
         encoded_image = image_data.get("base64_image", "")
-        decoded_image_data = base64.b64decode(encoded_image)
-        image = Image.open(io.BytesIO(decoded_image_data))
-        filename = "final.jpg"
-        image.save(os.path.join(Config.upload_image_path[0], filename), quality=100)
-        image = sorted(
-            os.listdir(Config.upload_image_path[0]),
-            key=lambda x: os.path.getatime(
-                os.path.join(Config.upload_image_path[0], x)
-            ),
-            reverse=True,
-        )
-    if image:
-        recent_image = image[0]
-        image_path = os.path.join(Config.upload_image_path[0], recent_image)
+        payload = {
+            "Name": Name,
+            "gender": gender,
+            "Department": Department,
+            "Image": encoded_image,
+        }
+        # logger.info(payload)
+        try:
+            url = requests.put(
+                f"http://127.0.0.1:8000/update/{EmployeeCode}", json=payload
+            )
+            url.status_code
+            # logger.info(url.json())
+ 
+            return redirect("/")
+ 
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed: {e}")
+    response = requests.get(f"http://127.0.0.1:8000/read/{EmployeeCode}")
+    # logger.info(response.status_code)
+    # logger.info(response.json())
+    if response.status_code == 200:
+        employee_data = response.json()
+        return render_template("edit.html", employee_data=employee_data)
     else:
-        recent_image = None
-    image_path = os.path.join(Config.upload_image_path[0], recent_image)
-    print("done")
-    files = {'Face': open(os.path.join(Config.upload_image_path[0],"final.jpg"), 'rb')}  
-    try:
-        fastapi_url = 'http://127.0.0.1:8000/recognize_face' 
-        req = requests.post(fastapi_url, files=files)
-        data= req.content
-        return (data)
-    except Exception as e:
-        print("Error:", e)
-   
+        return f"Error {response.status_code}: Failed to retrieve employee data."
  

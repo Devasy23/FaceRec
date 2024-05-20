@@ -25,7 +25,7 @@ router = APIRouter()
 
 
 client = Database()
-client2 = Database(MONGO_URI, "FaceRec")
+client2 = Database("mongodb+srv://devansh:iZV37cVwEuoBziyZ@devasy23.a8hxla5.mongodb.net/?retryWrites=true&w=majority&appName=Devasy23", "FaceRec")
 
 collection = "faceEntries"
 collection2 = "ImageDB"
