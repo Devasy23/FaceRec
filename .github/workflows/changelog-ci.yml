@@ -22,6 +22,7 @@ jobs:
           changelog_filename: CHANGELOG.md
           committer_username: github-actions[bot]
           committer_email: github-actions[bot]@users.noreply.github.com
+          config_file: changelog-config.yaml
           # GitHub token for authorization
           github_token: ${{ secrets.GITHUB_TOKEN }}
         # Create a new release
