@@ -1,12 +1,21 @@
-[![Python application](https://github.com/devansh-shah-11/FaceRec/actions/workflows/python-app.yml/badge.svg)](https://github.com/devansh-shah-11/FaceRec/actions/workflows/python-app.yml)
-[![CodeQL](https://github.com/devansh-shah-11/FaceRec/actions/workflows/codeql.yml/badge.svg)](https://github.com/devansh-shah-11/FaceRec/actions/workflows/codeql.yml)
-[![codecov](https://codecov.io/gh/devansh-shah-11/FaceRec/branch/main/graph/badge.svg)](https://codecov.io/gh/devansh-shah-11/FaceRec)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=alert_status)](https://sonarcloud.io/dashboard?id=Devasy23_FaceRec)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=bugs)](https://sonarcloud.io/dashboard?id=Devasy23_FaceRec)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=code_smells)](https://sonarcloud.io/dashboard?id=Devasy23_FaceRec)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=Devasy23_FaceRec)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=ncloc)](https://sonarcloud.io/dashboard?id=Devasy23_FaceRec)
-# Face Recognition Project
+<p align="center">
+    <a href="https://github.com/devansh-shah-11/FaceRec/actions/workflows/python-app.yml"><img src="https://github.com/devansh-shah-11/FaceRec/actions/workflows/python-app.yml/badge.svg" alt="Python application"></a>
+    <a href="https://github.com/devansh-shah-11/FaceRec/actions/workflows/codeql.yml"><img src="https://github.com/devansh-shah-11/FaceRec/actions/workflows/codeql.yml/badge.svg" alt="CodeQL"></a>
+    <a href="https://codecov.io/gh/devansh-shah-11/FaceRec"><img src="https://codecov.io/gh/devansh-shah-11/FaceRec/branch/main/graph/badge.svg" alt="codecov"></a>
+    <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=alert_status" alt="Quality Gate Status"></a>
+    <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=bugs" alt="Bugs"></a>
+    <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=code_smells" alt="Code Smells"></a>
+    <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=duplicated_lines_density" alt="Duplicated Lines (%)"></a>
+    <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=ncloc" alt="Lines of Code"></a>
+    <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=security_rating" alt="Security Rating"></a>
+    <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=sqale_rating" alt="Sqale Rating"></a>
+    <!-- <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=coverage" alt="Coverage"></a> -->
+    <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=sqale_index" alt="Sqale Index"></a>
+    <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=reliability_rating" alt="Reliability Rating"></a>
+    <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=vulnerabilities" alt="Vulnerabilities"></a>
+</p>
+
+<h1> Face Recognition Project </h1>
 
 This project uses Flask, FastAPI,DeepFace and MongoDB to create a Face recognition system. It allows users to register face with associated metadata, update their information and also can delete their data.
 
