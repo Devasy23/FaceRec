@@ -20,8 +20,39 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Analyze with SonarCloud
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install uv
+          uv pip install flake8 pytest pytest-cov
+          if [ -f requirements.txt ]; then uv pip install -r requirements.txt; fi
+
+      - name: Test with pytest
+        run: |
+          source venv/bin/activate
+          pytest --cov --cov-report term --cov-report xml:coverage.xml || true
+        continue-on-error: true
+
+      - name: Upload coverage data to SonarCloud
         uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Provided by GitHub Actions, no need for custom PAT unless required
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # SonarCloud secret token
+        with:
+          args: >
+            -Dsonar.python.coverage.reportPaths=coverage.xml
