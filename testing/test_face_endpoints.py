@@ -162,3 +162,43 @@ def test_delete_face():
     response = client.delete("/delete/1")
     assert response.status_code == 200
     assert response.json() == {"Message": "Successfully Deleted"}
+
+
+@pytest.mark.run(order=6)
+def test_recognize_face_fail():
+    mock_doc = {
+        "Image": "encoded_string2",
+        "Name": "Test2",
+        "score": 0.0,
+    }
+    with patch("API.database.Database.vector_search", return_value=[mock_doc]):
+
+        with open("./test-faces/devansh.jpg", "rb") as image_file:
+            response = client.post(
+                "/recognize_face",
+                files={"Face": image_file},
+            )
+        assert response.status_code == 404
+        assert response.json() == {"message": "No match found"}
+
+
+@pytest.mark.run(order=7)
+def test_recognize_face_success():
+    mock_doc = {
+        "Image": "encoded_string2",
+        "Name": "Test2",
+        "score": 1.0,
+    }
+    with patch("API.database.Database.vector_search", return_value=[mock_doc]):
+
+        with open("./test-faces/devansh.jpg", "rb") as image_file:
+            response = client.post(
+                "/recognize_face",
+                files={"Face": image_file},
+            )
+        assert response.status_code == 200
+        assert response.json() == {
+            "Name": "Test2",
+            "Image": "encoded_string2",
+            "score": 1.0,
+        }
