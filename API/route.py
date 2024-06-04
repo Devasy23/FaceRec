@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 from io import BytesIO
 from typing import List
-
+import re
 from bson import ObjectId
 from deepface import DeepFace
 from fastapi import APIRouter
@@ -62,10 +62,10 @@ async def create_new_faceEntry(Employee: Employee):
         None
     """
     logging.info('Creating new face entry')
-    Name = Employee.Name
-    EmployeeCode = Employee.EmployeeCode
-    gender = Employee.gender
-    Department = Employee.Department
+    Name = re.sub(' +', ' ', Employee.Name).replace('\r\n', '').replace('\n', '')
+    EmployeeCode = Employee.EmployeeCode.replace('\r\n', '').replace('\n', '')
+    gender = Employee.gender.replace('\r\n', '').replace('\n', '')
+    Department = Employee.Department.replace('\r\n', '').replace('\n', '')
     encoded_images = Employee.Images
     time = datetime.now()
 

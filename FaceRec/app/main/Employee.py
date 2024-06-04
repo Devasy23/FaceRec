@@ -162,7 +162,8 @@ def edit(EmployeeCode):
 # To delete employee details
 @flk_blueprint.route('/Delete/<int:EmployeeCode>', methods=['DELETE', 'GET'])
 def Delete(EmployeeCode):
-    # logger.info(employees)
+    if not isinstance(EmployeeCode, int):
+        return jsonify({'message': 'Employee code should be an integer'}, 400)
     response = requests.delete(f'http://127.0.0.1:8000/delete/{EmployeeCode}')
     jsonify(response.json())
 
