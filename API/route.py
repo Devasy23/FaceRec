@@ -4,15 +4,19 @@ import base64
 import json
 import logging
 import os
+import re
 from datetime import datetime
 from io import BytesIO
 from typing import List
-import re
+
 from bson import ObjectId
 from deepface import DeepFace
+from dotenv import load_dotenv
 from fastapi import APIRouter
+from fastapi import File
 from fastapi import HTTPException
 from fastapi import Response
+from fastapi import UploadFile
 from matplotlib import pyplot as plt
 from PIL import Image
 from pydantic import BaseModel
@@ -20,14 +24,18 @@ from pydantic import BaseModel
 from API.database import Database
 from API.utils import init_logging_config
 
+load_dotenv()
 init_logging_config()
 
+MONGO_URI = os.getenv('MONGO_URL1')
 router = APIRouter()
 
 
 client = Database()
+client2 = Database(MONGO_URI, 'FaceRec')
 
 collection = 'faceEntries'
+collection2 = 'ImageDB'
 
 
 # Models  for the data to be sent and received by the server
@@ -62,7 +70,10 @@ async def create_new_faceEntry(Employee: Employee):
         None
     """
     logging.info('Creating new face entry')
-    Name = re.sub(' +', ' ', Employee.Name).replace('\r\n', '').replace('\n', '')
+    Name = re.sub(' +', ' ', Employee.Name).replace(
+        '\r\n',
+        '',
+    ).replace('\n', '')
     EmployeeCode = Employee.EmployeeCode.replace('\r\n', '').replace('\n', '')
     gender = Employee.gender.replace('\r\n', '').replace('\n', '')
     Department = Employee.Department.replace('\r\n', '').replace('\n', '')
@@ -83,7 +94,7 @@ async def create_new_faceEntry(Employee: Employee):
         plt.imsave(f'Images/Faces/{Name}.jpg', face_image_data[0]['face'])
         logging.info(f'Face saved {Name}')
         embedding = DeepFace.represent(
-            image_filename, model_name='Facenet', detector_backend='mtcnn',
+            image_filename, model_name='Facenet512', detector_backend='mtcnn',
         )
         embeddings.append(embedding)
         logging.info(f'Embedding created Embeddings for {Name}')
@@ -91,8 +102,8 @@ async def create_new_faceEntry(Employee: Employee):
 
     logging.debug(f'About to insert Embeddings: {embeddings}')
     # Store the data in the database
-    client.insert_one(
-        collection,
+    client2.insert_one(
+        collection2,
         {
             'EmployeeCode': EmployeeCode,
             'Name': Name,
@@ -277,3 +288,43 @@ async def delete_employees(EmployeeCode: int):
     client.find_one_and_delete(collection, {'EmployeeCode': EmployeeCode})
 
     return {'Message': 'Successfully Deleted'}
+
+
+@router.post('/recognize_face', response_class=Response)
+async def recognize_face(Face: UploadFile = File(...)):
+    """
+    Recognize a face from the provided image.
+
+    Args:
+        Face (UploadFile): The image file to be recognized.
+
+    Returns:
+        Response: A response object containing the recognized employee information in JSON format.
+
+    Raises:
+        HTTPException: If an internal server error occurs.
+    """
+    logging.info('Recognizing Face')
+    try:
+        img_data = await Face.read()
+        with open('temp.png', 'wb') as f:
+            f.write(img_data)
+
+        embedding = DeepFace.represent(
+            img_path='temp.png', model_name='Facenet512', detector_backend='mtcnn',
+        )
+        result = client2.vector_search(collection2, embedding[0]['embedding'])
+        logging.info(f"Result: {result[0]['Name']}, {result[0]['score']}")
+        os.remove('temp.png')
+        if result[0]['score'] < 0.5:
+            return Response(
+                status_code=404, content=json.dumps({'message': 'No match found'}),
+            )
+    except Exception as e:
+        logging.error(f'Error: {e}')
+        os.remove('temp.png')
+        raise HTTPException(status_code=500, detail='Internal server error')
+    return Response(
+        content=bytes(json.dumps(result[0], default=str), 'utf-8'),
+        media_type='application/json',
+    )
