@@ -148,9 +148,9 @@ async def read_employee(EmployeeCode: int):
         HTTPException: If the employee is not found.
 
     """
-    logging.info(f'Display information for {EmployeeCode}')
+    logging.debug(f'Display information for {EmployeeCode}')
     try:
-        logging.info(f'Start {EmployeeCode}')
+        logging.debug(f'Start {EmployeeCode}')
         items = client.find_one(
             collection,
             filter={'EmployeeCode': EmployeeCode},
@@ -197,7 +197,7 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
         HTTPException: If no data was updated during the update operation.
         HTTPException: If an internal server error occurs.
     """
-    logging.info(f'Updating for EmployeeCode: {EmployeeCode}')
+    logging.debug(f'Updating for EmployeeCode: {EmployeeCode}')
     try:
         user_id = client.find_one(
             collection, {'EmployeeCode': EmployeeCode}, projection={'_id': True},
@@ -217,14 +217,14 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
             pil_image = Image.open(BytesIO(img_recovered))
             image_filename = f'{Employee.Name}.png'
             pil_image.save(image_filename)
-            logging.info(f'Image saved {Employee.Name}')
+            logging.debug(f'Image saved {Employee.Name}')
             face_image_data = DeepFace.extract_faces(
                 image_filename, detector_backend='mtcnn', enforce_detection=False,
             )
             embedding = DeepFace.represent(
                 image_filename, model_name='Facenet', detector_backend='mtcnn',
             )
-            logging.info(f'Embedding created {Employee.Name}')
+            logging.debug(f'Embedding created {Employee.Name}')
             embeddings.append(embedding)
             os.remove(image_filename)
         Employee_data['embeddings'] = embeddings
@@ -273,7 +273,7 @@ async def delete_employees(EmployeeCode: int):
 
     """
     logging.info('Deleting Employee')
-    logging.info(f'Deleting for EmployeeCode: {EmployeeCode}')
+    logging.debug(f'Deleting for EmployeeCode: {EmployeeCode}')
     client.find_one_and_delete(collection, {'EmployeeCode': EmployeeCode})
 
     return {'Message': 'Successfully Deleted'}
