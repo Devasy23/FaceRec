@@ -1,3 +1,15 @@
+# Version: v0.1.6
+
+* [#1](https://github.com/Devasy23/FaceRec/pull/1): Merge code mark 1
+* [#3](https://github.com/Devasy23/FaceRec/pull/3): Merge code mark 1
+* [#4](https://github.com/Devasy23/FaceRec/pull/4): Add issue and pull request templates
+* [#5](https://github.com/Devasy23/FaceRec/pull/5): Merge update
+* [#6](https://github.com/Devasy23/FaceRec/pull/6): Refactor code, add tests, and update dependencies
+* [#27](https://github.com/Devasy23/FaceRec/pull/27): Preliminary code for vector search
+* [#31](https://github.com/Devasy23/FaceRec/pull/31): Add Face Recognition System Proposal and Project Plan
+* [#39](https://github.com/Devasy23/FaceRec/pull/39): Update sonarcloud.yml
+
+
 ## [0.0.1] - 2024-03-08 - 2:30
 
 ### Added

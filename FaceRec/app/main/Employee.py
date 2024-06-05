@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import json
 import os
@@ -10,7 +12,7 @@ from FaceRec.config import Config
  
 video_capture = cv2.VideoCapture(0)
 flk_blueprint = Blueprint(
-    "flk_blueprint ",
+    'flk_blueprint ',
     __name__,
     template_folder="../../templates/",
     static_folder="../../static/",
@@ -29,10 +31,10 @@ def Main_page():
  
  
 # Displaying all records
-@flk_blueprint.route("/DisplayingEmployees")
+@flk_blueprint.route('/DisplayingEmployees')
 def display_information():
     global employees
-    url = "http://127.0.0.1:8000/Data/"
+    url = 'http://127.0.0.1:8000/Data/'
     try:
         resp = requests.get(url=url)
         # logger.info(resp.status_code)
@@ -45,13 +47,13 @@ def display_information():
  
  
 # To add employee record
-@flk_blueprint.route("/Add_employee")
+@flk_blueprint.route('/Add_employee')
 def add_employee():
     return render_template("index.html")
  
  
 # To submit the form data to server and save it in database
-@flk_blueprint.route("/submit_form", methods=["POST"])
+@flk_blueprint.route('/submit_form', methods=['POST'])
 def submit_form():
  
     Employee_Code = request.form["EmployeeCode"]
@@ -65,10 +67,10 @@ def submit_form():
         file = request.files["File"]
         allowed_extensions = {"png", "jpg", "jpeg"}
         if (
-            "." not in file.filename
-            or file.filename.split(".")[-1].lower() not in allowed_extensions
+            '.' not in file.filename
+            or file.filename.split('.')[-1].lower() not in allowed_extensions
         ):
-            return jsonify({"message": "File extension is not valid"}), 400
+            return jsonify({'message': 'File extension is not valid'}), 400
         if file:
             image_data = file.read()
             encoded_image = base64.b64encode(image_data).decode("utf-8")
@@ -77,23 +79,23 @@ def submit_form():
  
     with open(Config.image_data_file, "r") as file:
         image_data = json.load(file)
-    encoded_image = image_data.get("base64_image", "")
+    encoded_image = image_data.get('base64_image', '')
     jsonify(
         {
-            "EmployeeCode": Employee_Code,
-            "Name": Name,
-            "gender": gender,
-            "Department": Department,
-            "encoded_image": encoded_image,
-        }
+            'EmployeeCode': Employee_Code,
+            'Name': Name,
+            'gender': gender,
+            'Department': Department,
+            'encoded_image': encoded_image,
+        },
     )
  
     payload = {
-        "EmployeeCode": Employee_Code,
-        "Name": Name,
-        "gender": gender,
-        "Department": Department,
-        "Image": encoded_image,
+        'EmployeeCode': Employee_Code,
+        'Name': Name,
+        'gender': gender,
+        'Department': Department,
+        'Image': encoded_image,
     }
     url = "http://127.0.0.1:8000/create_new_faceEntry"
     payload.status_code
@@ -123,10 +125,11 @@ def submit_form():
  
  
 # To delete employee details
-@flk_blueprint.route("/Delete/<int:EmployeeCode>", methods=["DELETE", "GET"])
+@flk_blueprint.route('/Delete/<int:EmployeeCode>', methods=['DELETE', 'GET'])
 def Delete(EmployeeCode):
-    # logger.info(employees)
-    response = requests.delete(f"http://127.0.0.1:8000/delete/{EmployeeCode}")
+    if not isinstance(EmployeeCode, int):
+        return jsonify({'message': 'Employee code should be an integer'}, 400)
+    response = requests.delete(f'http://127.0.0.1:8000/delete/{EmployeeCode}')
     jsonify(response.json())
  
     return redirect("/DisplayingEmployees")

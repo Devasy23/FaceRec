@@ -21,7 +21,7 @@ This project uses Flask, FastAPI,DeepFace and MongoDB to create a Face recogniti
 
 ### Get started
 
-These instructions will get you a copy of the project up and running on your local machine for development. 
+These instructions will get you a copy of the project up and running on your local machine for development.
 
 ### Prerequisites
 
@@ -66,7 +66,7 @@ python main.py
 1. Create new connection in MongoDB and Connect using given url
    `URL: mongodb://localhost:27017/8000`
 
-2.  Create database using 
+2.  Create database using
     Database name: `DatabaseName`
     Collection name: `CollectionName`
 
@@ -84,7 +84,7 @@ The database contains a `faceEntries` collection with the following schema:
 - `embeddings`: The embeddings of the face image.
 - `Image`: Base64 encoded image file.
 
-## Function Flow 
+## Function Flow
 
 1. `create_new_faceEntry()`: This function receives a POST request with an image and metadata. It extracts the face from the image, calculates the embeddings, and stores the data in the database.
 
@@ -102,7 +102,7 @@ This project uses Flask, FastAPI,DeepFace and MongoDB to create a Face recogniti
 
 ### Get started
 
-These instructions will get you a copy of the project up and running on your local machine for development. 
+These instructions will get you a copy of the project up and running on your local machine for development.
 
 ### Prerequisites
 
@@ -147,7 +147,7 @@ python main.py
 1. Create new connection in MongoDB and Connect using given url
    `URL: mongodb://localhost:27017/8000`
 
-2.  Create database using 
+2.  Create database using
     Database name: `DatabaseName`
     Collection name: `CollectionName`
 
@@ -165,7 +165,7 @@ The database contains a `faceEntries` collection with the following schema:
 - `embeddings`: The embeddings of the face image.
 - `Images`: Base64 encoded image file.
 
-## Function Flow 
+## Function Flow
 
 1. `create_new_faceEntry()`: This function receives a POST request with an image and metadata. It extracts the face from the image, calculates the embeddings, and stores the data in the database.
 

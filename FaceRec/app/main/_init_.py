@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from flask import Flask
 
 from FaceRec.app.main.Employee import flk_blueprint
@@ -14,4 +16,4 @@ app.register_blueprint(Edit_blueprint)
 
 # function to run server of Flast
 def run_flask():
-    app.run(host="127.0.0.1", port=5000)
+    app.run(host='127.0.0.1', port=5000)
