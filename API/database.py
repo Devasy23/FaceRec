@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from pymongo import MongoClient
 
 
 class Database:
-    def __init__(self, uri="mongodb://localhost:27017/", db_name="ImageDB"):
+    def __init__(self, uri='mongodb://localhost:27017/', db_name='ImageDB'):
         self.client = MongoClient(uri)
         self.db = self.client[db_name]
 
@@ -29,23 +31,23 @@ class Database:
         result = self.db[collection].aggregate(
             [
                 {
-                    "$vectorSearch": {
-                        "index": "vector_index",
-                        "path": "face_embedding",
-                        "queryVector": embedding,
-                        "numCandidates": 20,
-                        "limit": 20,
-                    }
+                    '$vectorSearch': {
+                        'index': 'vector_index',
+                        'path': 'face_embedding',
+                        'queryVector': embedding,
+                        'numCandidates': 20,
+                        'limit': 20,
+                    },
                 },
                 {
-                    "$project": {
-                        "_id": 0,
-                        "Name": 1,
-                        "Image": 1,
-                        "score": {"$meta": "vectorSearchScore"},
-                    }
+                    '$project': {
+                        '_id': 0,
+                        'Name': 1,
+                        'Image': 1,
+                        'score': {'$meta': 'vectorSearchScore'},
+                    },
                 },
-            ]
+            ],
         )
         result_arr = [i for i in result]
         return result_arr
