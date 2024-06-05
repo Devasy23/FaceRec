@@ -73,13 +73,6 @@ def capture():
     return redirect("Image")
  
  
-    _, buffer = cv2.imencode('.jpg', frame)
-    encoded_image = base64.b64encode(buffer).decode('utf-8')
-    with open(Config.image_data_file, 'w') as file:
-        json.dump({'base64_image': encoded_image}, file)
-    return redirect('Image')
-
-
 # Route to display captured image
 @employee_blueprint.route('/Image', methods=['GET'])
 def display_image():
@@ -151,5 +144,14 @@ def display_pic():
     else:
         recent_image = None
     image_path = os.path.join(Config.upload_image_path[0], recent_image)
-    print('done')
-    return render_template('index.html', image_path=image_path)
+    print("done")
+    files = {'Face': open(os.path.join(Config.upload_image_path[0],"final.jpg"), 'rb')}  
+    try:
+        fastapi_url = 'http://127.0.0.1:8000/recognize_face' 
+        req = requests.post(fastapi_url, files=files)
+        data= req.content
+        return (data)
+    except Exception as e:
+        print("Error:", e)
+   
+ 

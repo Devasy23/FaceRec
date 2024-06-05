@@ -203,8 +203,8 @@ label{
                 <label for="Gender" class="form-label">Gender:</label><br>
                 <div style="padding-top: 10px;">
                 <select id="Gender" name="Gender" class="form-select form-select-lg mb-3 bg-primary.bg-gradient" aria-label=".form-select-lg example" value="{{employee_data.gender}}" required>
-
-                  <option value="Male" class="dropdown-item active">Male</option>
+                  
+                  <option value="Male" class="dropdown-item ">Male</option>
                   <option value="Female" class="dropdown-item" >Female</option>
                   <option value="Other" class="dropdown-item">Other</option>
                 </select><br><br></div>
@@ -247,7 +247,7 @@ label{
             <center><button id="myButton" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"> Video </button></center><br><br>
             <div id="myPopup" class="popup" class="form-wrap">
             <div class="popup-content" class="form-group">
-            <img src="{{url_for('employee_blueprint.video_feed')}}" width="1050" height="550" style="margin-left:2.5%;"/><br><br>
+            <img src="{{url_for('Edit_blueprint.video_feed')}}" width="1050" height="550" style="margin-left:2.5%;"/><br><br> 
             <div class="container">
             <button id="captureButton"class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"> Capture </button>
             <button  id="closePopup" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail">Close</button>
