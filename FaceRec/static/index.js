@@ -20,6 +20,27 @@ $(document).ready(function () {
     });
 });
 
+$(document).ready(function () {
+    $("#captureButton1").on("click", function () {
+        $.ajax({
+            type: "POST",
+            url: "/capturing",
+            success: function (response) {
+                console.log(response)
+                updateImage();
+                enableImage();
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    });
+});
+
+
+
+
+
 
 function updateImage(){
     var img = document.getElementById('Image');
@@ -33,8 +54,6 @@ function enableImage(){
     var uploadElement = document.getElementById('Upload');
     uploadElement.removeAttribute('hidden');
 }
-
-
 myButton.addEventListener("click", function () {
     myPopup.classList.add("show");
 });
