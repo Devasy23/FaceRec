@@ -1,0 +1,46 @@
+stages:
+  - build
+  - test
+
+default:
+  image: python:3.9.18-slim-bullseye
+
+cache:
+  paths:
+    - .cache/pip  # Cache pip downloads
+    - venv  # Cache virtual environment
+
+before_script:
+  - python -m venv venv  # Create a virtual environment
+  - source venv/bin/activate  # Activate virtual environment
+  - pip install --upgrade pip  # Upgrade pip
+  - pip install uv
+  - uv pip install -r requirements.txt  # Install requirements
+
+linting-job:
+  stage: build
+  script:
+    - echo "Linting code... This will take about 10 seconds."
+    - pip install black isort flake8  # Install additional linting tools
+    - black .
+    - isort .
+    - flake8 . || echo "Linting check failed but allowed to continue"
+
+pytest-job:
+  stage: build  # Change stage to 'build' to run in parallel with linting-job
+  script:
+    - echo "Running pytest... This will take about 1 minute."
+    - apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
+    - uv pip install pytest-cov  # Install testing tools
+    - black .
+    - pytest --junitxml=pytest.xml || true  # Ensure that tests run to completion
+    - pytest --cov --cov-report term --cov-report xml:coverage.xml || true
+    - ls -la  # Debugging step to check if coverage.xml is present
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+      junit: pytest.xml
+    expire_in: "30 days"

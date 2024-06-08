@@ -29,7 +29,7 @@
                 <th>Gender:</th>
                 <th>Department:</th>
                 <th colspan="10">Actions</th>
-                
+
                 <!-- <th>Image:</th> -->
             </tr>
                 {%for Employee in employees %}
@@ -43,10 +43,10 @@
                 <td><a href="{{url_for('flk_blueprint .edit',EmployeeCode=Employee.EmployeeCode)}}"><button id="Edit" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"style="background-color:#330c61;; border: 0px; justify-content: space-around;">Edit</button></a></td>
             </tr>
                 {%endfor%}
-            
+
           </table><br>
       </div>
-      
+
 </body>
 <script src="../static/index.js"></script>
 </html>

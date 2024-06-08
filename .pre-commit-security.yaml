@@ -1,0 +1,17 @@
+repos:
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.0
+    hooks:
+      - id: bandit
+        files: \.py$  # Run Bandit only on Python files
+        additional_dependencies: [toml]  # Additional dependencies required by Bandit
+        args: [--skip, B101]  # Skip Bandit test B101 (assert statements)
+  - repo: https://github.com/safepass-dev/safepass-pre-commit
+    rev: v0.1.0
+    hooks:
+      - id: safepass
+        files: \.(py|yaml|yml|json)$  # Run Safepass on Python, YAML, and JSON files
+  - repo: https://github.com/pyupio/safety-hooks
+    rev: v2.0.3
+    hooks:
+      - id: safety
