@@ -19,7 +19,7 @@ from fastapi import Response
 from fastapi import UploadFile
 from matplotlib import pyplot as plt
 from PIL import Image
-from pydantic import BaseModel
+from pydantic import BaseModel, validator, constr
 
 from API.database import Database
 from API.utils import init_logging_config
@@ -42,17 +42,29 @@ collection3 = 'VectorDB'
 # Models  for the data to be sent and received by the server
 class Employee(BaseModel):
     EmployeeCode: int
-    Name: str
-    gender: str
-    Department: str
-    Images: list[str]
+    Name: constr(strip_whitespace=True, min_length=1)
+    gender: constr(strip_whitespace=True, min_length=1)
+    Department: constr(strip_whitespace=True, min_length=1)
+    Images: list[constr(strip_whitespace=True, min_length=1)]
+
+    @validator('Images')
+    def images_must_not_be_empty(cls, v):
+        if not v:
+            raise ValueError('Images list must not be empty')
+        return v
 
 
 class UpdateEmployee(BaseModel):
-    Name: str
-    gender: str
-    Department: str
-    Images: list[str]
+    Name: constr(strip_whitespace=True, min_length=1)
+    gender: constr(strip_whitespace=True, min_length=1)
+    Department: constr(strip_whitespace=True, min_length=1)
+    Images: list[constr(strip_whitespace=True, min_length=1)]
+
+    @validator('Images')
+    def images_must_not_be_empty(cls, v):
+        if not v:
+            raise ValueError('Images list must not be empty')
+        return v
 
 
 # To create new entries of employee
@@ -75,9 +87,9 @@ async def create_new_faceEntry(Employee: Employee):
         '\r\n',
         '',
     ).replace('\n', '')
-    EmployeeCode = Employee.EmployeeCode.replace('\r\n', '').replace('\n', '')
-    gender = Employee.gender.replace('\r\n', '').replace('\n', '')
-    Department = Employee.Department.replace('\r\n', '').replace('\n', '')
+    EmployeeCode = Employee.EmployeeCode
+    gender = Employee.gender
+    Department = Employee.Department
     encoded_images = Employee.Images
     time = datetime.now()
 
@@ -115,15 +127,15 @@ async def create_new_faceEntry(Employee: Employee):
             'Images': encoded_images,
         },
     )
-
-    client2.insert_one(
-        collection3,
-        {
-            'EmployeeCode': EmployeeCode,
-            'Name': Name,
-            'Embeddings': embeddings,
-        },
-    )
+    for embedding in embeddings:
+        client2.insert_one(
+            collection3,
+            {
+                'EmployeeCode': EmployeeCode,
+                'Name': Name,
+                'Embeddings': embedding[0]['embedding'],
+            },
+        )
     
     return {'message': 'Face entry created successfully'}
 
