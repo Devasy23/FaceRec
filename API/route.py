@@ -36,6 +36,7 @@ client2 = Database(MONGO_URI, 'FaceRec')
 
 collection = 'faceEntries'
 collection2 = 'ImageDB'
+collection3 = 'VectorDB'
 
 
 # Models  for the data to be sent and received by the server
@@ -115,6 +116,15 @@ async def create_new_faceEntry(Employee: Employee):
         },
     )
 
+    client2.insert_one(
+        collection3,
+        {
+            'EmployeeCode': EmployeeCode,
+            'Name': Name,
+            'Embeddings': embeddings,
+        },
+    )
+    
     return {'message': 'Face entry created successfully'}
 
 
@@ -233,13 +243,33 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
                 image_filename, detector_backend='mtcnn', enforce_detection=False,
             )
             embedding = DeepFace.represent(
-                image_filename, model_name='Facenet', detector_backend='mtcnn',
+                image_filename, model_name='Facenet512', detector_backend='mtcnn',
             )
             logging.debug(f'Embedding created {Employee.Name}')
             embeddings.append(embedding)
             os.remove(image_filename)
         Employee_data['embeddings'] = embeddings
 
+        collection3 = client2["VectorDB"]
+        employee = collection3.find_one({'Employee Code': EmployeeCode})
+        if employee:
+            update_result = collection3.update_one(
+                {'Employee Code': EmployeeCode},
+                {'$set': {'Embeddings': embeddings}},
+            )
+            logging.info(f'Update result {update_result}')
+            if update_result.modified_count == 0:
+                raise HTTPException(
+                    status_code=400, detail='No data was updated',
+                )
+        else:
+            collection3.insert_one(
+                {
+                    'Employee Code': EmployeeCode,
+                    'Name': Employee.Name,
+                    'Embeddings': embeddings,
+                },
+            )
         try:
             update_result = client.update_one(
                 collection,
