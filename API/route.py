@@ -19,7 +19,7 @@ from fastapi import Response
 from fastapi import UploadFile
 from matplotlib import pyplot as plt
 from PIL import Image
-from pydantic import BaseModel
+from pydantic import BaseModel, validator, constr
 
 from API.database import Database
 from API.utils import init_logging_config
@@ -36,22 +36,35 @@ client2 = Database(MONGO_URI, 'FaceRec')
 
 collection = 'faceEntries'
 collection2 = 'ImageDB'
+collection3 = 'VectorDB'
 
 
 # Models  for the data to be sent and received by the server
 class Employee(BaseModel):
     EmployeeCode: int
-    Name: str
-    gender: str
-    Department: str
-    Images: list[str]
+    Name: constr(strip_whitespace=True, min_length=1)
+    gender: constr(strip_whitespace=True, min_length=1)
+    Department: constr(strip_whitespace=True, min_length=1)
+    Images: list[constr(strip_whitespace=True, min_length=1)]
+
+    @validator('Images')
+    def images_must_not_be_empty(cls, v):
+        if not v:
+            raise ValueError('Images list must not be empty')
+        return v
 
 
 class UpdateEmployee(BaseModel):
-    Name: str
-    gender: str
-    Department: str
-    Images: list[str]
+    Name: constr(strip_whitespace=True, min_length=1)
+    gender: constr(strip_whitespace=True, min_length=1)
+    Department: constr(strip_whitespace=True, min_length=1)
+    Images: list[constr(strip_whitespace=True, min_length=1)]
+
+    @validator('Images')
+    def images_must_not_be_empty(cls, v):
+        if not v:
+            raise ValueError('Images list must not be empty')
+        return v
 
 
 # To create new entries of employee
@@ -74,9 +87,9 @@ async def create_new_faceEntry(Employee: Employee):
         '\r\n',
         '',
     ).replace('\n', '')
-    EmployeeCode = Employee.EmployeeCode.replace('\r\n', '').replace('\n', '')
-    gender = Employee.gender.replace('\r\n', '').replace('\n', '')
-    Department = Employee.Department.replace('\r\n', '').replace('\n', '')
+    EmployeeCode = Employee.EmployeeCode
+    gender = Employee.gender
+    Department = Employee.Department
     encoded_images = Employee.Images
     time = datetime.now()
 
@@ -114,7 +127,16 @@ async def create_new_faceEntry(Employee: Employee):
             'Images': encoded_images,
         },
     )
-
+    for embedding in embeddings:
+        client2.insert_one(
+            collection3,
+            {
+                'EmployeeCode': EmployeeCode,
+                'Name': Name,
+                'Embeddings': embedding[0]['embedding'],
+            },
+        )
+    
     return {'message': 'Face entry created successfully'}
 
 
@@ -233,13 +255,33 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
                 image_filename, detector_backend='mtcnn', enforce_detection=False,
             )
             embedding = DeepFace.represent(
-                image_filename, model_name='Facenet', detector_backend='mtcnn',
+                image_filename, model_name='Facenet512', detector_backend='mtcnn',
             )
             logging.debug(f'Embedding created {Employee.Name}')
             embeddings.append(embedding)
             os.remove(image_filename)
         Employee_data['embeddings'] = embeddings
 
+        collection3 = client2["VectorDB"]
+        employee = collection3.find_one({'Employee Code': EmployeeCode})
+        if employee:
+            update_result = collection3.update_one(
+                {'Employee Code': EmployeeCode},
+                {'$set': {'Embeddings': embeddings}},
+            )
+            logging.info(f'Update result {update_result}')
+            if update_result.modified_count == 0:
+                raise HTTPException(
+                    status_code=400, detail='No data was updated',
+                )
+        else:
+            collection3.insert_one(
+                {
+                    'Employee Code': EmployeeCode,
+                    'Name': Employee.Name,
+                    'Embeddings': embeddings,
+                },
+            )
         try:
             update_result = client.update_one(
                 collection,
