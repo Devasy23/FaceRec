@@ -140,3 +140,4 @@ venv/
 *.pyc
 .vscode/
 __pyc
+Images/
