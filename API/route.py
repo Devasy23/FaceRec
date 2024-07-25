@@ -56,6 +56,7 @@ class UpdateEmployee(BaseModel):
     Images: list[str]
 
 def load_and_preprocess_image(img_path, target_size=(160, 160)):
+    
     img = image.load_img(img_path, target_size=target_size)
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
@@ -100,12 +101,19 @@ async def create_new_faceEntry(Employee: Employee):
         # embedding = DeepFace.represent(
         #     image_filename, model_name='Facenet512', detector_backend='mtcnn',
         # )
-        img_array = load_and_preprocess_image(image_filename)
-        model=load_model('Model/embedding_trial3.h5')
-        embedding = model.predict(img_array)[0]
-        embedding_list = embedding.astype(float).tolist()
-        embeddings.append(embedding_list)
-        logging.info(f'Embedding created Embeddings for {Name}')
+        
+        face_image_data = DeepFace.extract_faces(
+            image_filename, detector_backend='mtcnn', enforce_detection=False,
+        )
+        if face_image_data[0]['face'] is not None:
+            plt.imsave(f'Images/Faces/{Name}.jpg', face_image_data[0]['face'])
+            
+            img_array = load_and_preprocess_image(f'Images/Faces/{Name}.jpg')
+            model=load_model('Model/embedding_trial3.h5')
+            embedding = model.predict(img_array)[0]
+            embedding_list = embedding.tolist()
+            embeddings.append(embedding_list)
+            logging.info(f'Embedding created Embeddings for {Name}')
         os.remove(image_filename)
 
     logging.debug(f'About to insert Embeddings: {embeddings}')
@@ -136,7 +144,7 @@ async def get_employees():
         list[Employee]: A list of Employee objects containing employee information.
     """
     logging.info('Displaying all employees')
-    employees_mongo = client.find(collection)
+    employees_mongo = client2.find(collection2)
     logging.info(f'Employees found {employees_mongo}')
     employees = [
         Employee(
@@ -170,8 +178,8 @@ async def read_employee(EmployeeCode: int):
     logging.debug(f'Display information for {EmployeeCode}')
     try:
         logging.debug(f'Start {EmployeeCode}')
-        items = client.find_one(
-            collection,
+        items = client2.find_one(
+            collection2,
             filter={'EmployeeCode': EmployeeCode},
             projection={
                 'Name': True,
@@ -218,8 +226,8 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
     """
     logging.debug(f'Updating for EmployeeCode: {EmployeeCode}')
     try:
-        user_id = client.find_one(
-            collection, {'EmployeeCode': EmployeeCode}, projection={'_id': True},
+        user_id = client2.find_one(
+            collection2, {'EmployeeCode': EmployeeCode}, projection={'_id': True},
         )
         print(user_id)
         if not user_id:
@@ -241,17 +249,25 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
             # embedding = DeepFace.represent(
             #     image_filename, model_name='Facenet', detector_backend='mtcnn',
             # )
-            img_array = load_and_preprocess_image(image_filename)
-            model=load_model('Model/embedding_trial3.h5')
-            embedding = model.predict(img_array)
-            logging.debug(f'Embedding created {Employee.Name}')
-            embeddings.append(embedding)
+            
+            face_image_data = DeepFace.extract_faces(
+                image_filename, detector_backend='mtcnn', enforce_detection=False,
+            )
+            if face_image_data[0]['face'] is not None:
+                plt.imsave(f'Images/Faces/{Employee.Name}.jpg', face_image_data[0]['face'])
+                
+                img_array = load_and_preprocess_image(f'Images/Faces/{Employee.Name}.jpg')
+                model=load_model('Model/embedding_trial3.h5')
+                embedding = model.predict(img_array)[0]
+                embedding_list = embedding.tolist()
+                embeddings.append(embedding_list)
+                logging.info(f'Embedding created Embeddings for {Employee.Name}')
             os.remove(image_filename)
         Employee_data['embeddings'] = embeddings
 
         try:
-            update_result = client.update_one(
-                collection,
+            update_result = client2.update_one(
+                collection2,
                 {'_id': ObjectId(user_id['_id'])},
                 update={'$set': Employee_data},
             )
@@ -294,7 +310,7 @@ async def delete_employees(EmployeeCode: int):
     """
     logging.info('Deleting Employee')
     logging.debug(f'Deleting for EmployeeCode: {EmployeeCode}')
-    client.find_one_and_delete(collection, {'EmployeeCode': EmployeeCode})
+    client2.find_one_and_delete(collection2, {'EmployeeCode': EmployeeCode})
 
     return {'Message': 'Successfully Deleted'}
 
@@ -317,26 +333,36 @@ async def recognize_face(Face: UploadFile = File(...)):
     try:
         # Code to calculate embeddings via Original Facenet model
         
-        # img_data = await Face.read()
-        # with open('temp.png', 'wb') as f:
-        #     f.write(img_data)
+        img_data = await Face.read()
+        image_filename = 'temp.png'
+        with open(image_filename, 'wb') as f:
+            f.write(img_data)
         # embedding = DeepFace.represent(
         #     img_path='temp.png', model_name='Facenet512', detector_backend='mtcnn',
         # )
         
         # Code to calculate embeddings via Finetuned Facenet model
+        face_image_data = DeepFace.extract_faces(
+            image_filename, detector_backend='mtcnn', enforce_detection=False,
+        )
         
-        img_data = await Face.read()
-        img_array = load_and_preprocess_image(BytesIO(img_data))
-        model=load_model('Model/embedding_trial3.h5')
-        embedding = model.predict(img_array)
-        result = client2.vector_search(collection2, embedding[0]['embedding'])
-        logging.info(f"Result: {result[0]['Name']}, {result[0]['score']}")
-        os.remove('temp.png')
-        if result[0]['score'] < 0.5:
-            return Response(
-                status_code=404, content=json.dumps({'message': 'No match found'}),
-            )
+        if face_image_data and face_image_data[0]['face'] is not None:
+            
+            plt.imsave(f'Images/Faces/tmp.jpg', face_image_data[0]['face'])
+            face_image_path = f'Images/Faces/tmp.jpg'
+            img_array = load_and_preprocess_image(face_image_path)
+            
+            model = load_model('Model/embedding_trial3.h5')
+            embedding_list = model.predict(img_array)[0]  # Get the first prediction
+            print(embedding_list, type(embedding_list))
+            embedding = embedding_list.tolist()
+            result = client2.vector_search(collection2, embedding)
+            logging.info(f"Result: {result[0]['Name']}, {result[0]['score']}")
+            os.remove('temp.png')
+            if result[0]['score'] < 0.5:
+                return Response(
+                    status_code=404, content=json.dumps({'message': 'No match found'}),
+                )
     except Exception as e:
         logging.error(f'Error: {e}')
         os.remove('temp.png')
