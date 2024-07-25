@@ -8,7 +8,7 @@ import re
 from datetime import datetime
 from io import BytesIO
 from typing import List
-
+from tensorflow.keras.models import load_model
 from bson import ObjectId
 from deepface import DeepFace
 from dotenv import load_dotenv
@@ -20,6 +20,8 @@ from fastapi import UploadFile
 from matplotlib import pyplot as plt
 from PIL import Image
 from pydantic import BaseModel
+import numpy as np
+from keras.preprocessing import image
 
 from API.database import Database
 from API.utils import init_logging_config
@@ -53,6 +55,12 @@ class UpdateEmployee(BaseModel):
     Department: str
     Images: list[str]
 
+def load_and_preprocess_image(img_path, target_size=(160, 160)):
+    img = image.load_img(img_path, target_size=target_size)
+    img_array = image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array /= 255.0
+    return img_array
 
 # To create new entries of employee
 @router.post('/create_new_faceEntry')
@@ -74,7 +82,7 @@ async def create_new_faceEntry(Employee: Employee):
         '\r\n',
         '',
     ).replace('\n', '')
-    EmployeeCode = Employee.EmployeeCode.replace('\r\n', '').replace('\n', '')
+    EmployeeCode = Employee.EmployeeCode
     gender = Employee.gender.replace('\r\n', '').replace('\n', '')
     Department = Employee.Department.replace('\r\n', '').replace('\n', '')
     encoded_images = Employee.Images
@@ -88,15 +96,15 @@ async def create_new_faceEntry(Employee: Employee):
         image_filename = f'{Name}.png'
         pil_image.save(image_filename)
         pil_image.save(fr'Images\dbImages\{Name}.jpg')
-        face_image_data = DeepFace.extract_faces(
-            image_filename, detector_backend='mtcnn', enforce_detection=False,
-        )
-        plt.imsave(f'Images/Faces/{Name}.jpg', face_image_data[0]['face'])
         logging.info(f'Face saved {Name}')
-        embedding = DeepFace.represent(
-            image_filename, model_name='Facenet512', detector_backend='mtcnn',
-        )
-        embeddings.append(embedding)
+        # embedding = DeepFace.represent(
+        #     image_filename, model_name='Facenet512', detector_backend='mtcnn',
+        # )
+        img_array = load_and_preprocess_image(image_filename)
+        model=load_model('Model/embedding_trial3.h5')
+        embedding = model.predict(img_array)[0]
+        embedding_list = embedding.astype(float).tolist()
+        embeddings.append(embedding_list)
         logging.info(f'Embedding created Embeddings for {Name}')
         os.remove(image_filename)
 
@@ -229,12 +237,13 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
             image_filename = f'{Employee.Name}.png'
             pil_image.save(image_filename)
             logging.debug(f'Image saved {Employee.Name}')
-            face_image_data = DeepFace.extract_faces(
-                image_filename, detector_backend='mtcnn', enforce_detection=False,
-            )
-            embedding = DeepFace.represent(
-                image_filename, model_name='Facenet', detector_backend='mtcnn',
-            )
+            
+            # embedding = DeepFace.represent(
+            #     image_filename, model_name='Facenet', detector_backend='mtcnn',
+            # )
+            img_array = load_and_preprocess_image(image_filename)
+            model=load_model('Model/embedding_trial3.h5')
+            embedding = model.predict(img_array)
             logging.debug(f'Embedding created {Employee.Name}')
             embeddings.append(embedding)
             os.remove(image_filename)
@@ -306,13 +315,21 @@ async def recognize_face(Face: UploadFile = File(...)):
     """
     logging.info('Recognizing Face')
     try:
+        # Code to calculate embeddings via Original Facenet model
+        
+        # img_data = await Face.read()
+        # with open('temp.png', 'wb') as f:
+        #     f.write(img_data)
+        # embedding = DeepFace.represent(
+        #     img_path='temp.png', model_name='Facenet512', detector_backend='mtcnn',
+        # )
+        
+        # Code to calculate embeddings via Finetuned Facenet model
+        
         img_data = await Face.read()
-        with open('temp.png', 'wb') as f:
-            f.write(img_data)
-
-        embedding = DeepFace.represent(
-            img_path='temp.png', model_name='Facenet512', detector_backend='mtcnn',
-        )
+        img_array = load_and_preprocess_image(BytesIO(img_data))
+        model=load_model('Model/embedding_trial3.h5')
+        embedding = model.predict(img_array)
         result = client2.vector_search(collection2, embedding[0]['embedding'])
         logging.info(f"Result: {result[0]['Name']}, {result[0]['score']}")
         os.remove('temp.png')
