@@ -140,4 +140,7 @@ venv/
 *.pyc
 .vscode/
 __pyc
+FaceRec/static/Images/uploads/*
+Images/dbImages/*
+Images/Faces/*
 Images/
