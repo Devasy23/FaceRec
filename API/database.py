@@ -33,7 +33,7 @@ class Database:
                 {
                     '$vectorSearch': {
                         'index': 'vector_index',
-                        'path': 'face_embedding',
+                        'path': 'embedding',
                         'queryVector': embedding,
                         'numCandidates': 20,
                         'limit': 20,

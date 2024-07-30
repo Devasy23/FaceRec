@@ -406,7 +406,7 @@ async def recognize_face(Face: UploadFile = File(...)):
             embedding_list = model.predict(img_array)[0]  # Get the first prediction
             print(embedding_list, type(embedding_list))
             embedding = embedding_list.tolist()
-            result = client2.vector_search(collection2, embedding)
+            result = client2.vector_search(collection3, embedding)
             logging.info(f"Result: {result[0]['Name']}, {result[0]['score']}")
             os.remove('temp.png')
             if result[0]['score'] < 0.5:
