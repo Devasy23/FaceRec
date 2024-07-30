@@ -38,7 +38,7 @@ client2 = Database(MONGO_URI, 'FaceRec')
 
 collection = 'faceEntries'
 collection2 = 'ImageDB'
-
+collection3 = 'VectorDB'
 
 # Models  for the data to be sent and received by the server
 class Employee(BaseModel):
@@ -112,14 +112,11 @@ async def recalculate_embeddings():
         if 'Images' in employee:
             images = employee['Images']
         else:
-            images = employee['Image']
+            images = [employee['Image']]
         
         for encoded_image in images:
-            encoded_image = encoded_image.replace('data:image/png;base64,', '')
-            encoded_image = encoded_image.strip()
-            encoded_image += '=' * (-len(encoded_image) % 4)
-            img_recovered = base64.b64decode(encoded_image)
-            pil_image = Image.open(BytesIO(img_recovered))
+            
+            pil_image = Image.open(BytesIO(base64.b64decode(encoded_image)))
             image_filename = f'{employee["Name"]}.png'
             pil_image.save(image_filename)
             logging.debug(f'Image saved {employee["Name"]}')
