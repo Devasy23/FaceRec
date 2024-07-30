@@ -76,7 +76,7 @@ def calculate_embeddings(image_filename):
     """
     
     face_image_data = DeepFace.extract_faces(
-        image_filename, detector_backend='mtcnn', enforce_detection=False,
+        image_filename, enforce_detection=False,
     )
     new_image_path = f'Images/Faces/tmp.jpg'
     
