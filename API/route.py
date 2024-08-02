@@ -8,7 +8,7 @@ import re
 from datetime import datetime
 from io import BytesIO
 from typing import List
-
+from tensorflow.keras.models import load_model
 from bson import ObjectId
 from deepface import DeepFace
 from dotenv import load_dotenv
@@ -20,6 +20,8 @@ from fastapi import UploadFile
 from matplotlib import pyplot as plt
 from PIL import Image
 from pydantic import BaseModel
+import numpy as np
+from keras.preprocessing import image
 
 from API.database import Database
 from API.utils import init_logging_config
@@ -36,7 +38,7 @@ client2 = Database(MONGO_URI, 'FaceRec')
 
 collection = 'faceEntries'
 collection2 = 'ImageDB'
-
+collection3 = 'VectorDB'
 
 # Models  for the data to be sent and received by the server
 class Employee(BaseModel):
@@ -52,6 +54,84 @@ class UpdateEmployee(BaseModel):
     gender: str
     Department: str
     Images: list[str]
+
+def load_and_preprocess_image(img_path, target_size=(160, 160)):
+    
+    img = image.load_img(img_path, target_size=target_size)
+    img_array = image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array /= 255.0
+    return img_array
+
+def calculate_embeddings(image_filename):
+    
+    """
+    Calculate embeddings for the provided image.
+    
+    Args:
+        image_filename (str): The path to the image file.
+        
+    Returns:
+        list: A list of embeddings for the image.
+    """
+    
+    face_image_data = DeepFace.extract_faces(
+        image_filename, enforce_detection=False,
+    )
+    new_image_path = f'Images/Faces/tmp.jpg'
+    
+    if face_image_data[0]['face'] is not None:
+        plt.imsave(new_image_path, face_image_data[0]['face'])
+        
+        img_array = load_and_preprocess_image(new_image_path)
+        model=load_model('Model/embedding_trial3.h5')
+        embedding = model.predict(img_array)[0]
+        embedding_list = embedding.tolist()
+        logging.info(f'Embedding created')
+        
+        return embedding_list
+
+@router.post('/recalculate_embeddings')
+async def recalculate_embeddings():
+    """
+    Recalculate embeddings for all the images in the database.
+
+    Returns:
+        dict: A dictionary with a success message.
+
+    Raises:
+        None
+    """
+    logging.info('Recalculating embeddings')
+    employees_mongo = client2.find(collection2)
+    for employee in employees_mongo:
+        print(employee, type(employee))
+        embeddings = []
+        
+        # In the initial version, the images were stored in the 'Image' field
+        if 'Images' in employee:
+            images = employee['Images']
+        else:
+            images = [employee['Image']]
+        
+        for encoded_image in images:
+            
+            pil_image = Image.open(BytesIO(base64.b64decode(encoded_image)))
+            image_filename = f'{employee["Name"]}.png'
+            pil_image.save(image_filename)
+            logging.debug(f'Image saved {employee["Name"]}')
+            embeddings.append(calculate_embeddings(image_filename))
+            # os.remove(image_filename)
+
+        logging.debug(f'About to update Embeddings: {embeddings}')
+        # Store the data in the database
+        client2.update_one(
+            collection2,
+            {'EmployeeCode': employee['EmployeeCode']},
+            {'$set': {'embeddings': embeddings, 'Images': images}},
+        )
+
+    return {'message': 'Embeddings Recalculated successfully'}
 
 
 # To create new entries of employee
@@ -74,7 +154,7 @@ async def create_new_faceEntry(Employee: Employee):
         '\r\n',
         '',
     ).replace('\n', '')
-    EmployeeCode = Employee.EmployeeCode.replace('\r\n', '').replace('\n', '')
+    EmployeeCode = Employee.EmployeeCode
     gender = Employee.gender.replace('\r\n', '').replace('\n', '')
     Department = Employee.Department.replace('\r\n', '').replace('\n', '')
     encoded_images = Employee.Images
@@ -88,17 +168,13 @@ async def create_new_faceEntry(Employee: Employee):
         image_filename = f'{Name}.png'
         pil_image.save(image_filename)
         pil_image.save(fr'Images\dbImages\{Name}.jpg')
-        face_image_data = DeepFace.extract_faces(
-            image_filename, detector_backend='mtcnn', enforce_detection=False,
-        )
-        plt.imsave(f'Images/Faces/{Name}.jpg', face_image_data[0]['face'])
         logging.info(f'Face saved {Name}')
-        embedding = DeepFace.represent(
-            image_filename, model_name='Facenet512', detector_backend='mtcnn',
-        )
-        embeddings.append(embedding)
-        logging.info(f'Embedding created Embeddings for {Name}')
-        os.remove(image_filename)
+        # embedding = DeepFace.represent(
+        #     image_filename, model_name='Facenet512', detector_backend='mtcnn',
+        # )
+        
+        embeddings.append(calculate_embeddings(image_filename))
+        # os.remove(image_filename)
 
     logging.debug(f'About to insert Embeddings: {embeddings}')
     # Store the data in the database
@@ -128,7 +204,7 @@ async def get_employees():
         list[Employee]: A list of Employee objects containing employee information.
     """
     logging.info('Displaying all employees')
-    employees_mongo = client.find(collection)
+    employees_mongo = client2.find(collection2)
     logging.info(f'Employees found {employees_mongo}')
     employees = [
         Employee(
@@ -162,8 +238,8 @@ async def read_employee(EmployeeCode: int):
     logging.debug(f'Display information for {EmployeeCode}')
     try:
         logging.debug(f'Start {EmployeeCode}')
-        items = client.find_one(
-            collection,
+        items = client2.find_one(
+            collection2,
             filter={'EmployeeCode': EmployeeCode},
             projection={
                 'Name': True,
@@ -210,8 +286,8 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
     """
     logging.debug(f'Updating for EmployeeCode: {EmployeeCode}')
     try:
-        user_id = client.find_one(
-            collection, {'EmployeeCode': EmployeeCode}, projection={'_id': True},
+        user_id = client2.find_one(
+            collection2, {'EmployeeCode': EmployeeCode}, projection={'_id': True},
         )
         print(user_id)
         if not user_id:
@@ -229,20 +305,19 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
             image_filename = f'{Employee.Name}.png'
             pil_image.save(image_filename)
             logging.debug(f'Image saved {Employee.Name}')
-            face_image_data = DeepFace.extract_faces(
-                image_filename, detector_backend='mtcnn', enforce_detection=False,
-            )
-            embedding = DeepFace.represent(
-                image_filename, model_name='Facenet', detector_backend='mtcnn',
-            )
-            logging.debug(f'Embedding created {Employee.Name}')
-            embeddings.append(embedding)
-            os.remove(image_filename)
+            
+            # embedding = DeepFace.represent(
+            #     image_filename, model_name='Facenet', detector_backend='mtcnn',
+            # )
+            
+            embeddings.append(calculate_embeddings(image_filename))
+            # os.remove(image_filename)
+
         Employee_data['embeddings'] = embeddings
 
         try:
-            update_result = client.update_one(
-                collection,
+            update_result = client2.update_one(
+                collection2,
                 {'_id': ObjectId(user_id['_id'])},
                 update={'$set': Employee_data},
             )
@@ -285,7 +360,7 @@ async def delete_employees(EmployeeCode: int):
     """
     logging.info('Deleting Employee')
     logging.debug(f'Deleting for EmployeeCode: {EmployeeCode}')
-    client.find_one_and_delete(collection, {'EmployeeCode': EmployeeCode})
+    client2.find_one_and_delete(collection2, {'EmployeeCode': EmployeeCode})
 
     return {'Message': 'Successfully Deleted'}
 
@@ -306,20 +381,38 @@ async def recognize_face(Face: UploadFile = File(...)):
     """
     logging.info('Recognizing Face')
     try:
+        # Code to calculate embeddings via Original Facenet model
+        
         img_data = await Face.read()
-        with open('temp.png', 'wb') as f:
+        image_filename = 'temp.png'
+        with open(image_filename, 'wb') as f:
             f.write(img_data)
-
-        embedding = DeepFace.represent(
-            img_path='temp.png', model_name='Facenet512', detector_backend='mtcnn',
+        # embedding = DeepFace.represent(
+        #     img_path='temp.png', model_name='Facenet512', detector_backend='mtcnn',
+        # )
+        
+        # Code to calculate embeddings via Finetuned Facenet model
+        face_image_data = DeepFace.extract_faces(
+            image_filename, detector_backend='mtcnn', enforce_detection=False,
         )
-        result = client2.vector_search(collection2, embedding[0]['embedding'])
-        logging.info(f"Result: {result[0]['Name']}, {result[0]['score']}")
-        os.remove('temp.png')
-        if result[0]['score'] < 0.5:
-            return Response(
-                status_code=404, content=json.dumps({'message': 'No match found'}),
-            )
+        
+        if face_image_data and face_image_data[0]['face'] is not None:
+            
+            plt.imsave(f'Images/Faces/tmp.jpg', face_image_data[0]['face'])
+            face_image_path = f'Images/Faces/tmp.jpg'
+            img_array = load_and_preprocess_image(face_image_path)
+            
+            model = load_model('Model/embedding_trial3.h5')
+            embedding_list = model.predict(img_array)[0]  # Get the first prediction
+            print(embedding_list, type(embedding_list))
+            embedding = embedding_list.tolist()
+            result = client2.vector_search(collection3, embedding)
+            logging.info(f"Result: {result[0]['Name']}, {result[0]['score']}")
+            os.remove('temp.png')
+            if result[0]['score'] < 0.5:
+                return Response(
+                    status_code=404, content=json.dumps({'message': 'No match found'}),
+                )
     except Exception as e:
         logging.error(f'Error: {e}')
         os.remove('temp.png')
