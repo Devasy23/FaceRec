@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
- 
+
     <meta charset="utf-8">
     <meta name="viewpoint" content="width=device-width, initial-scale=1.0">
     <title>Capture image</title>
@@ -8,14 +8,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="../static/index.css">
- 
+
 </head>
 <body style="background-color: rgb(255, 255, 255);font-family: Georgia, 'Times New Roman', Times, serif;color: rgb(36, 1, 59);">
     <h1 style="text-align: center;font-family: Georgia, 'Times New Roman', Times, serif;" >Face Recognition</h1>
     <br><br>
         <div class="container">
             </div>
-           
+
             <div class="form-wrap" style="width:auto; height: auto;">
             <h2 style="text-align: center;font-family: Georgia, 'Times New Roman', Times, serif;color: rgb(36, 1, 59);font-weight: bold;font-size:large;"> Webcam Video Stream</h2>
             <center><button id="myButton" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"> Video </button></center><br><br>
@@ -29,19 +29,19 @@
             </div>
             </div>
             <h2 class="text-center" id="Upload"style="text-align: center;font-family: Georgia, 'Times New Roman', Times, serif;color: rgb(36, 1, 59);font-weight: bold;" hidden> Uploaded Image</h2>
-           
+
             <img alt="recently added image" id="Image" width="600" height="500" hidden/><br><br>
             <p id="nameDisplay"></p><br>
             <p id="scoreDisplay"></p>
             </div>
             </div>
-           
-       
-       
+
+
+
 </body>
   <script>
 $(document).ready(function () {
-   
+
     $("#captureButton").on("click", function () {
         $.ajax({
             type: "POST",
@@ -51,7 +51,7 @@ $(document).ready(function () {
                 var name = data1.Name;
                 var score = data1.score;
                 var displayText = "Name: " + name;
-                var scoreText = "Score: " + score 
+                var scoreText = "Score: " + score
                 $("#nameDisplay").text(displayText);
                 $("#scoreDisplay").text(scoreText);
                 updateImage();
@@ -63,8 +63,8 @@ $(document).ready(function () {
         });
     });
 });
- 
- 
+
+
 function updateImage(){
     var img = document.getElementById('Image');
     img.src = 'static/Images/uploads/final.jpg';
@@ -72,7 +72,7 @@ function updateImage(){
     myPopup.classList.remove("show");
     updateImage1()
 }
- 
+
 function enableImage(){
     var imgElement = document.getElementById('Image');
     imgElement.removeAttribute('hidden');
@@ -84,21 +84,21 @@ function updateImage1() {
     var img = document.getElementById('Image');
     img.src = 'static/Images/uploads/final.jpg?' + new Date().getTime(); // Append a timestamp to the image URL to force reload
 }
- 
+
 myButton.addEventListener("click", function () {
     myPopup.classList.add("show");
 });
- 
+
 closePopup.addEventListener("click", function () {
 //     myPopup.classList.remove("show");
 //    updateImage1()
 });
- 
+
 window.addEventListener("click", function (event) {
     if (event.target == myPopup) {
         myPopup.classList.remove("show");
     }
 });
- 
+
 </script>
 </html>

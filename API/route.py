@@ -8,7 +8,8 @@ import re
 from datetime import datetime
 from io import BytesIO
 from typing import List
-from tensorflow.keras.models import load_model
+
+import numpy as np
 from bson import ObjectId
 from deepface import DeepFace
 from dotenv import load_dotenv
@@ -17,11 +18,11 @@ from fastapi import File
 from fastapi import HTTPException
 from fastapi import Response
 from fastapi import UploadFile
+from keras.preprocessing import image
 from matplotlib import pyplot as plt
 from PIL import Image
 from pydantic import BaseModel
-import numpy as np
-from keras.preprocessing import image
+from tensorflow.keras.models import load_model
 
 from API.database import Database
 from API.utils import init_logging_config
@@ -41,6 +42,8 @@ collection2 = 'ImageDB'
 collection3 = 'VectorDB'
 
 # Models  for the data to be sent and received by the server
+
+
 class Employee(BaseModel):
     EmployeeCode: int
     Name: str
@@ -55,41 +58,43 @@ class UpdateEmployee(BaseModel):
     Department: str
     Images: list[str]
 
+
 def load_and_preprocess_image(img_path, target_size=(160, 160)):
-    
+
     img = image.load_img(img_path, target_size=target_size)
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
     img_array /= 255.0
     return img_array
 
+
 def calculate_embeddings(image_filename):
-    
     """
     Calculate embeddings for the provided image.
-    
+
     Args:
         image_filename (str): The path to the image file.
-        
+
     Returns:
         list: A list of embeddings for the image.
     """
-    
+
     face_image_data = DeepFace.extract_faces(
         image_filename, enforce_detection=False,
     )
     new_image_path = f'Images/Faces/tmp.jpg'
-    
+
     if face_image_data[0]['face'] is not None:
         plt.imsave(new_image_path, face_image_data[0]['face'])
-        
+
         img_array = load_and_preprocess_image(new_image_path)
-        model=load_model('Model/embedding_trial3.h5')
+        model = load_model('Model/embedding_trial3.h5')
         embedding = model.predict(img_array)[0]
         embedding_list = embedding.tolist()
         logging.info(f'Embedding created')
-        
+
         return embedding_list
+
 
 @router.post('/recalculate_embeddings')
 async def recalculate_embeddings():
@@ -107,15 +112,15 @@ async def recalculate_embeddings():
     for employee in employees_mongo:
         print(employee, type(employee))
         embeddings = []
-        
+
         # In the initial version, the images were stored in the 'Image' field
         if 'Images' in employee:
             images = employee['Images']
         else:
             images = [employee['Image']]
-        
+
         for encoded_image in images:
-            
+
             pil_image = Image.open(BytesIO(base64.b64decode(encoded_image)))
             image_filename = f'{employee["Name"]}.png'
             pil_image.save(image_filename)
@@ -172,7 +177,7 @@ async def create_new_faceEntry(Employee: Employee):
         # embedding = DeepFace.represent(
         #     image_filename, model_name='Facenet512', detector_backend='mtcnn',
         # )
-        
+
         embeddings.append(calculate_embeddings(image_filename))
         # os.remove(image_filename)
 
@@ -305,11 +310,11 @@ async def update_employees(EmployeeCode: int, Employee: UpdateEmployee):
             image_filename = f'{Employee.Name}.png'
             pil_image.save(image_filename)
             logging.debug(f'Image saved {Employee.Name}')
-            
+
             # embedding = DeepFace.represent(
             #     image_filename, model_name='Facenet', detector_backend='mtcnn',
             # )
-            
+
             embeddings.append(calculate_embeddings(image_filename))
             # os.remove(image_filename)
 
@@ -382,7 +387,7 @@ async def recognize_face(Face: UploadFile = File(...)):
     logging.info('Recognizing Face')
     try:
         # Code to calculate embeddings via Original Facenet model
-        
+
         img_data = await Face.read()
         image_filename = 'temp.png'
         with open(image_filename, 'wb') as f:
@@ -390,20 +395,21 @@ async def recognize_face(Face: UploadFile = File(...)):
         # embedding = DeepFace.represent(
         #     img_path='temp.png', model_name='Facenet512', detector_backend='mtcnn',
         # )
-        
+
         # Code to calculate embeddings via Finetuned Facenet model
         face_image_data = DeepFace.extract_faces(
             image_filename, detector_backend='mtcnn', enforce_detection=False,
         )
-        
+
         if face_image_data and face_image_data[0]['face'] is not None:
-            
+
             plt.imsave(f'Images/Faces/tmp.jpg', face_image_data[0]['face'])
             face_image_path = f'Images/Faces/tmp.jpg'
             img_array = load_and_preprocess_image(face_image_path)
-            
+
             model = load_model('Model/embedding_trial3.h5')
-            embedding_list = model.predict(img_array)[0]  # Get the first prediction
+            embedding_list = model.predict(
+                img_array)[0]  # Get the first prediction
             print(embedding_list, type(embedding_list))
             embedding = embedding_list.tolist()
             result = client2.vector_search(collection3, embedding)
