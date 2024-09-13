@@ -17,6 +17,9 @@ documentation for details.
 
 
 .. include:: FaceRec.rst
+.. include:: API.rst
+.. include:: FaceRec.app.rst
+.. include:: FaceRec.app.main.rst  
 .. include:: modules.rst
 .. include:: route.rst
 .. include:: testing.rst
