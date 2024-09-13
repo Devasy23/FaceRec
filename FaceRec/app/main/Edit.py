@@ -2,27 +2,33 @@ import base64
 import io
 import json
 import os
+
 import cv2
+import requests
 from flask import Blueprint
 from flask import Response as flask_response
 from flask import redirect, render_template, request
 from PIL import Image
-import requests
- 
+
 from FaceRec.config import Config
- 
+
 Edit_blueprint = Blueprint(
     "Edit_blueprint",
     __name__,
     template_folder="../../templates/",
     static_folder="../../static/",
 )
- 
+
 cap = cv2.VideoCapture(0)
- 
- 
+
+
 # function for displaying live video
 def display_live_video():
+    """
+    Generator for displaying live video from the camera.
+
+    Yields frames as JPEG images.
+    """
     while True:
         success, frame = cap.read()  # Read a frame from the camera
         if not success:
@@ -36,19 +42,38 @@ def display_live_video():
             b"--frame\r\n"
             b"Content-Type: image/jpeg\r\n\r\n" + bytearray(buffer) + b"\r\n\r\n"
         )
- 
- 
+
+
 # Route for displaying video
 @Edit_blueprint.route("/video_feed")
 def video_feed():
+    """Route for displaying live video from the camera.
+
+    Returns a multipart response with a JPEG image for each frame from the camera.
+    """
     return flask_response(
         display_live_video(), mimetype="multipart/x-mixed-replace;boundary=frame"
     )
- 
- 
+
+
 # Route for capturing image from video
 @Edit_blueprint.route("/capture", methods=["GET", "POST"])
 def capture():
+    """Route for capturing an image from the video feed.
+
+    This route is used to capture a single frame from the video feed and save it to a file.
+    The frame is flipped horizontally before saving.
+
+    The image is stored in a file specified by the `Config.image_data_file` variable.
+
+    The response is a redirect to the "Image" route, which displays the captured image.
+
+    The request is expected to be a POST request with the following form data:
+        - EmployeeCode: The employee code for the person in the image.
+        - Name: The name of the person in the image.
+        - gender: The gender of the person in the image.
+        - Department: The department of the person in the image.
+    """
     global EmployeeCode
     global Name
     global gender
@@ -65,11 +90,26 @@ def capture():
     with open(Config.image_data_file, "w") as file:
         json.dump({"base64_image": encoded_image}, file)
     return redirect("Image")
- 
- 
+
+
 # Route to display captured image
 @Edit_blueprint.route("/Image", methods=["GET"])
 def display_image():
+    """Route to display the captured image.
+
+    This route reads the image data from a file specified by the
+    `Config.image_data_file` variable and displays it in the template.
+
+    The image is saved to a file in the directory specified by the
+    `Config.upload_image_path` variable.
+
+    The most recent image is displayed.
+
+    The image is displayed in the template with the name "image_path".
+
+    Returns:
+        A rendered template with the image path.
+    """
     if os.path.exists(Config.image_data_file):
         with open(Config.image_data_file, "r") as file:
             image_data = json.load(file)
@@ -93,9 +133,38 @@ def display_image():
     image_path = os.path.join(Config.upload_image_path[0], recent_image)
     print("done")
     return render_template("index.html", image_path=image_path)
- 
+
+
 @Edit_blueprint.route("/edit/<int:EmployeeCode>", methods=["POST", "GET"])
 def edit(EmployeeCode):
+    """Edit an existing employee.
+
+    This route allows users to edit an existing employee record. The
+    employee is identified by the EmployeeCode, which is a required
+    parameter.
+
+    The route accepts both GET and POST requests. A GET request will
+    retrieve the employee data from the database and display it in
+    the template. A POST request will update the employee data in the
+    database with the values provided in the form.
+
+    The form data is expected to contain the following fields:
+
+    - Name
+    - gender
+    - Department
+
+    The image is expected to be stored in the `Config.image_data_file`
+    file.
+
+    The most recent image is displayed.
+
+    The image is displayed in the template with the name "image_path".
+
+    Returns:
+        A rendered template with the image path if the request is a
+        GET, or a redirect to the home page if the request is a POST.
+    """
     if request.method == "POST":
         Name = request.form["Name"]
         gender = request.form["Gender"]
@@ -116,9 +185,9 @@ def edit(EmployeeCode):
             )
             url.status_code
             # logger.info(url.json())
- 
+
             return redirect("/")
- 
+
         except requests.exceptions.RequestException as e:
             print(f"Request failed: {e}")
     response = requests.get(f"http://127.0.0.1:8000/read/{EmployeeCode}")
@@ -129,4 +198,3 @@ def edit(EmployeeCode):
         return render_template("edit.html", employee_data=employee_data)
     else:
         return f"Error {response.status_code}: Failed to retrieve employee data."
- 
