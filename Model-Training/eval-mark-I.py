@@ -47,8 +47,11 @@ def calculate_intra_cluster_distances(embeddings, labels):
     for label in unique_labels:
         cluster_embeddings = embeddings[labels == label]
         avg_embedding = np.mean(cluster_embeddings, axis=0)
-        max_distance = np.max(euclidean_distances(
-            cluster_embeddings, [avg_embedding]))
+        max_distance = np.max(
+            euclidean_distances(
+                cluster_embeddings, [avg_embedding],
+            ),
+        )
         distances.append(max_distance)
 
     return np.array(distances)

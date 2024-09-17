@@ -439,7 +439,8 @@ async def recognize_face(Face: UploadFile = File(...)):
 
             model = load_model('Model/embedding_trial3.h5')
             embedding_list = model.predict(
-                img_array)[0]  # Get the first prediction
+                img_array,
+            )[0]  # Get the first prediction
             print(embedding_list, type(embedding_list))
             embedding = embedding_list.tolist()
             result = client2.vector_search(collection3, embedding)

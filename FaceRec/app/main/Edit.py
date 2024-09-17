@@ -122,8 +122,11 @@ def display_image():
         decoded_image_data = base64.b64decode(encoded_image)
         image = Image.open(io.BytesIO(decoded_image_data))
         filename = 'final.png'
-        image.save(os.path.join(
-            Config.upload_image_path[0], filename), quality=100)
+        image.save(
+            os.path.join(
+                Config.upload_image_path[0], filename,
+            ), quality=100,
+        )
         image = sorted(
             os.listdir(Config.upload_image_path[0]),
             key=lambda x: os.path.getatime(

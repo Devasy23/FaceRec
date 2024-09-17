@@ -7,8 +7,10 @@ from FaceRec.app.main.Employee import flk_blueprint
 from FaceRec.app.main.Face import Face_Rec_blueprint
 from FaceRec.app.main.VideoImage import employee_blueprint
 
-app = Flask(__name__, template_folder='../../templates/',
-            static_folder='../../static/')
+app = Flask(
+    __name__, template_folder='../../templates/',
+    static_folder='../../static/',
+)
 
 # To register blueprints of flask
 app.register_blueprint(flk_blueprint)

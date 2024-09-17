@@ -229,8 +229,13 @@ def display_pic():
         recent_image = None
     image_path = os.path.join(Config.upload_image_path[0], recent_image)
     print('done')
-    files = {'Face': open(os.path.join(
-        Config.upload_image_path[0], 'final.jpg'), 'rb')}
+    files = {
+        'Face': open(
+            os.path.join(
+                Config.upload_image_path[0], 'final.jpg',
+            ), 'rb',
+        ),
+    }
     try:
         fastapi_url = 'http://127.0.0.1:8000/recognize_face'
         req = requests.post(fastapi_url, files=files)
