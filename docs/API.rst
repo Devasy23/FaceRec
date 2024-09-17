@@ -12,13 +12,6 @@ API.database module
    :undoc-members:
    :show-inheritance:
 
-API.route module
-----------------
-
-.. automodule:: API.route
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 API.utils module
 ----------------
