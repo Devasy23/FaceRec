@@ -392,7 +392,8 @@ async def delete_employees(EmployeeCode: int):
 
     """
     logging.info('Deleting Employee')
-    sanitized_employee_code = re.sub(r'\D', '', str(EmployeeCode)).replace('\n', '').replace('\r', '')
+    sanitized_employee_code = re.sub(r'\D', '', str(
+        EmployeeCode)).replace('\n', '').replace('\r', '')
     logging.debug(f"Deleting for EmployeeCode: {sanitized_employee_code}")
     client2.find_one_and_delete(collection2, {'EmployeeCode': EmployeeCode})
 
