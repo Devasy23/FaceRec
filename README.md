@@ -151,13 +151,13 @@ FastAPI -> Database: Delete entry
 ## 🔄 Function Flow
 
 1. **`create_new_faceEntry()`**: Receives a POST request with an image and metadata. It extracts the face from the image, calculates the embeddings, and stores the data in the database.
-  
+
 2. **`Data()`**: Sends a GET request to the `/data` endpoint of the FastAPI app to retrieve the list of face entries from MongoDB.
-  
+
 3. **`update()`**: Updates the details of a face entry in the database.
-  
+
 4. **`read()`**: Sends a GET request with a specific `Employeecode` to retrieve related information.
-  
+
 5. **`delete()`**: Deletes a specific employee's data from the database.
 
 ## 🧪 Testing
