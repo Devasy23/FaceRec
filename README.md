@@ -60,8 +60,7 @@ python main.py
 
 Your application will be available at `http://localhost:5000`.
 
-<details>
-<summary> <span style="font-size: 1.5em;"><strong>Project Structure</strong></span></summary>
+## Project Structure
 
 - `requirements.txt`: Contains the Python dependencies for the project.
 - `API/`: Contains the code for the FastAPI application.
@@ -70,8 +69,6 @@ Your application will be available at `http://localhost:5000`.
 - `docs/`: Contains documentation files.
 - `test-faces/`: Contains test data for face recognition.
 - `main.py`: Contains code to start both FastAPI and Flask applications.
-
-</details>
 
 ## Database Schema
 
