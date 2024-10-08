@@ -70,28 +70,6 @@ Your application will be available at `http://localhost:5000`.
 - `test-faces/`: Contains test data for face recognition.
 - `main.py`: Contains code to start both FastAPI and Flask applications.
 
-## Database Schema
-
-1. Create a new connection in MongoDB using the following URL: `URL: mongodb://localhost:27017/8000`
-
-2. Create a database using:
-- Database name: `DatabaseName`
-- Collection name: `CollectionName`
-
-3. Add data by importing the JSON file from the `database.mongo` folder: `{DatabaseName}.{CollectionName}.json`
-
-
-The database contains a `faceEntries` collection with the following schema:
-
-- `id`: A unique identifier for the face entry.
-- `Employeecode`: A unique employee ID associated with the image.
-- `Name`: The name of the person in the image.
-- `gender`: The gender of the person.
-- `Department`: The department of the person.
-- `time`: The time the face entry was created.
-- `embeddings`: The embeddings of the face image.
-- `Images`: Base64 encoded image file.
-
 ## Function Flow
 
 1. `create_new_faceEntry()`: Receives a POST request with an image and metadata. It extracts the face, calculates the embeddings, and stores the data in the database.
