@@ -19,6 +19,38 @@ This project uses **Flask**, **FastAPI**, **DeepFace**, and **MongoDB** to creat
     <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=vulnerabilities" alt="Vulnerabilities"></a>
 </p>
 
+# 📚 Table of Contents
+
+1. [Project Overview](#-project-overview)
+2. [Get Started](#-get-started)
+   - [Prerequisites](#-prerequisites)
+   - [Installing](#-installing)
+   - [Running the Server](#-running-the-server)
+3. [Project Structure](#-project-structure)
+4. [Database Schema](#-database-schema)
+5. [Function Flow](#-function-flow)
+6. [Testing](#-testing)
+7. [License](#-license)
+   
+# 📂 Project Overview
+
+This project is a facial recognition system designed for employee management using FastAPI, Flask, and MongoDB. The application allows for:
+
+- Storing employee details along with facial embeddings in a MongoDB database.
+- Managing employees through an easy-to-use API interface with functionality for creating, reading, updating, and deleting face entries.
+- Integrating both FastAPI (for API operations) and Flask (for front-end operations) into a seamless web application.
+- Efficient face detection and recognition using state-of-the-art machine learning techniques.
+
+### Key Features:
+- **Facial Recognition**: Extract and store facial embeddings from uploaded images.
+- **Employee Management**: Add, update, and delete employee data along with their associated images.
+- **Database Storage**: Store and retrieve data securely using MongoDB.
+- **API Integration**: Provide an API interface to interact with the data.
+- **Testing**: Use Pytest for testing and ensuring the application's reliability.
+
+This application is built with the intent of simplifying employee data management, using facial recognition as the core identification method, ensuring efficiency and security. Whether you're adding a new employee or updating an existing one, this system provides a simple, robust, and scalable solution for managing employee records with facial data.
+
+
 ## 🚀 Get Started
 
 These instructions will get you a copy of the project up and running on your local machine for development.
