@@ -19,6 +19,11 @@ This project uses **Flask**, **FastAPI**, **DeepFace**, and **MongoDB** to creat
     <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/api/project_badges/measure?project=Devasy23_FaceRec&metric=vulnerabilities" alt="Vulnerabilities"></a>
 </p>
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/alo7lika/FaceRec/refs/heads/main/Face%20Recognition%20Project%20-%20Dashboard.png" alt="Face Recognition Dashboard" width="600" />
+</p>
+
+
 # 📚 Table of Contents
 
 1. [Project Overview](#-project-overview)
