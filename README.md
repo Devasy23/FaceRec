@@ -36,7 +36,7 @@ This project uses **Flask**, **FastAPI**, **DeepFace**, and **MongoDB** to creat
 5. [Function Flow](#-function-flow)
 6. [Testing](#-testing)
 7. [License](#-license)
-   
+
 # 📂 Project Overview
 
 This project is a facial recognition system designed for employee management using FastAPI, Flask, and MongoDB. The application allows for:
