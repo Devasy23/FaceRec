@@ -13,7 +13,6 @@ This project uses **Flask**, **FastAPI**, **DeepFace**, and **MongoDB** to creat
     <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec&metric=ncloc" alt="Lines of Code"></a>
     <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec&metric=security_rating" alt="Security Rating"></a>
     <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec&metric=sqale_rating" alt="Sqale Rating"></a>
-    <!-- <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec&metric=coverage" alt="Coverage"></a> -->
     <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec&metric=sqale_index" alt="Sqale Index"></a>
     <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec&metric=reliability_rating" alt="Reliability Rating"></a>
     <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec&metric=vulnerabilities" alt="Vulnerabilities"></a>
