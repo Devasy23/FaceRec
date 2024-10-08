@@ -1,3 +1,7 @@
+# 🖼️ Face Recognition Project
+
+This project uses **Flask**, **FastAPI**, **DeepFace**, and **MongoDB** to create a face recognition system. It allows users to register faces with associated metadata, update their information, and delete their data.
+
 <p align="center">
     <a href="https://github.com/devansh-shah-11/FaceRec/actions/workflows/python-app.yml"><img src="https://github.com/devansh-shah-11/FaceRec/actions/workflows/python-app.yml/badge.svg" alt="Python application"></a>
     <a href="https://github.com/devansh-shah-11/FaceRec/actions/workflows/codeql.yml"><img src="https://github.com/devansh-shah-11/FaceRec/actions/workflows/codeql.yml/badge.svg" alt="CodeQL"></a>
@@ -14,10 +18,6 @@
     <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec&metric=reliability_rating" alt="Reliability Rating"></a>
     <a href="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec"><img src="https://sonarcloud.io/dashboard?id=Devasy23_FaceRec&metric=vulnerabilities" alt="Vulnerabilities"></a>
 </p>
-
-# 🖼️ Face Recognition Project
-
-This project uses **Flask**, **FastAPI**, **DeepFace**, and **MongoDB** to create a face recognition system. It allows users to register faces with associated metadata, update their information, and delete their data.
 
 ## 🚀 Get Started
 
