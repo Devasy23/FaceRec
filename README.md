@@ -91,13 +91,14 @@ To start Flask and FastAPI, run the following command:
 ```bash
 python main.py
 ```
+
 ## 📂 Project Structure
 
 | Directory/File      | Description                                       |
 |---------------------|---------------------------------------------------|
 | `requirements.txt`  | Contains the Python dependencies for the project. |
 | `API/`              | Contains code for the FastAPI application.       |
-| `FaceRec/`          | Contains all files for the HTML, CSS, and Flask application. |
+| `FaceRec/`          | Contains all files for the HTML, CSS, and Flask applications. |
 | `main.py`           | Contains code to start FastAPI and Flask together.|
 
 ## 🗄️ Database Schema
@@ -117,6 +118,7 @@ Add data by importing the JSON file from the `database.mongo` folder:
 ```bash
 {DatabaseName}.{CollectionName}.json
 ```
+
 ## 🗄️ Database Schema
 
 The database contains a `faceEntries` collection with the following schema:
@@ -142,7 +144,7 @@ The database contains a `faceEntries` collection with the following schema:
 
 4. **`read()`**: This function sends a GET request with a specific Employeecode to read the information related to that particular Employeecode.
 
-5. **`delete()`**: This function is used to delete specific employee data.
+5. **`delete()`**: This function deletes specific employee data.
 
 ## 🧪 Testing
 
@@ -152,4 +154,4 @@ To run the tests, use the following command:
 pytest
 ```
 ## 📜 License
-This project is licensed under the APACHE License - see the LICENSE file for details.
+This project is licensed under the APACHE License - please look at the LICENSE file for details.
