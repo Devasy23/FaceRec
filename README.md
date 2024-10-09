@@ -20,7 +20,7 @@ This project uses **Flask**, **FastAPI**, **DeepFace**, and **MongoDB** to creat
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/alo7lika/FaceRec/refs/heads/main/Face%20Recognition%20Project%20-%20Dashboard.png" alt="Face Recognition Dashboard" width="600" />
+  <img src="https://raw.githubusercontent.com/alo7lika/FaceRec/refs/heads/main/Face%20Recognition%20Project%20-%20Dashboard.png" alt="Face Recognition Dashboard"width="600"/>
 </p>
 
 
