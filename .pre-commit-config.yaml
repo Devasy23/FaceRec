@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
@@ -8,7 +8,6 @@ repos:
     -   id: debug-statements
     -   id: double-quote-string-fixer
     -   id: name-tests-test
-    -   id: requirements-txt-fixer
 -   repo: https://github.com/asottile/setup-cfg-fmt
     rev: v2.5.0
     hooks:
@@ -46,7 +45,7 @@ repos:
     #     additional_dependencies: [wily]
 
 -   repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.29.0
+    rev: v3.29.1
     hooks:
     - id: commitizen
     stages: [commit-msg]

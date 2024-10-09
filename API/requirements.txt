@@ -1,0 +1,11 @@
+deepface==0.0.92
+fastapi==0.115.0
+keras==2.15.0
+matplotlib==3.8.2
+numpy==2.1.2
+Pillow==10.4.0
+pydantic==2.9.2
+pymongo==4.6.1
+python-dotenv==1.0.1
+tensorflow==2.15.0
+uvicorn==0.31.0
