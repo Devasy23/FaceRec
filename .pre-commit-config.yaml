@@ -1,52 +1,15 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+  - repo: https://github.com/psf/black
+    rev: 24.8.0  # Use the latest stable version of Black
     hooks:
-    -   id: trailing-whitespace
-    -   id: end-of-file-fixer
-    -   id: check-yaml
-    -   id: debug-statements
-    -   id: double-quote-string-fixer
-    -   id: name-tests-test
-    -   id: requirements-txt-fixer
--   repo: https://github.com/asottile/setup-cfg-fmt
-    rev: v2.5.0
-    hooks:
-    -   id: setup-cfg-fmt
--   repo: https://github.com/asottile/reorder-python-imports
-    rev: v3.13.0
-    hooks:
-    -   id: reorder-python-imports
-        args: [--py38-plus, --add-import, 'from __future__ import annotations']
--   repo: https://github.com/asottile/add-trailing-comma
-    rev: v3.1.0
-    hooks:
-    -   id: add-trailing-comma
--   repo: https://github.com/asottile/pyupgrade
-    rev: v3.17.0
-    hooks:
-    -   id: pyupgrade
-        args: [--py38-plus]
--   repo: https://github.com/hhatto/autopep8
-    rev: v2.3.1
-    hooks:
-    -   id: autopep8
-# -   repo: https://github.com/PyCQA/flake8
-#     rev: 7.0.0
-#     hooks:
-#     -   id: flake8
-#         exclude: testing/
-# -   repo: local
-    # hooks:
-    # -   id: wily
-    #     name: wily
-    #     entry: wily diff
-    #     verbose: true
-    #     language: python
-    #     additional_dependencies: [wily]
+      - id: black
 
--   repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.29.0
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
     hooks:
-    - id: commitizen
-    stages: [commit-msg]
+      - id: isort
+
+  - repo: https://github.com/hhatto/autopep8
+    rev: v2.3.1  # Use the latest stable version of autopep8
+    hooks:
+      - id: autopep8
