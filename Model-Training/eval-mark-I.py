@@ -49,7 +49,8 @@ def calculate_intra_cluster_distances(embeddings, labels):
         avg_embedding = np.mean(cluster_embeddings, axis=0)
         max_distance = np.max(
             euclidean_distances(
-                cluster_embeddings, [avg_embedding],
+                cluster_embeddings,
+                [avg_embedding],
             ),
         )
         distances.append(max_distance)
@@ -58,17 +59,17 @@ def calculate_intra_cluster_distances(embeddings, labels):
 
 
 # Load the pre-trained FaceNet model (replace 'facenet_model.h5' with your model file)
-model_path = 'facenet_model.h5'
+model_path = "facenet_model.h5"
 model = load_model(model_path)
 
 # Path to the dataset
-dataset_path = 'path_to_your_dataset'
+dataset_path = "path_to_your_dataset"
 
 # Generate embeddings for the original model
 embeddings_original, labels = generate_embeddings(model, dataset_path)
 
 # Load the fine-tuned model (replace 'facenet_model_finetuned.h5' with your fine-tuned model file)
-finetuned_model_path = 'facenet_model_finetuned.h5'
+finetuned_model_path = "facenet_model_finetuned.h5"
 finetuned_model = load_model(finetuned_model_path)
 
 # Generate embeddings for the fine-tuned model
@@ -76,10 +77,12 @@ embeddings_finetuned, _ = generate_embeddings(finetuned_model, dataset_path)
 
 # Calculate intra-cluster distances for both models
 intra_distances_original = calculate_intra_cluster_distances(
-    embeddings_original, labels,
+    embeddings_original,
+    labels,
 )
 intra_distances_finetuned = calculate_intra_cluster_distances(
-    embeddings_finetuned, labels,
+    embeddings_finetuned,
+    labels,
 )
 
 # Compare intra-cluster distances
