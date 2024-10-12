@@ -32,15 +32,22 @@ jobs:
                 issues(first:1, filterBy: {createdBy: $creator}) {
                   totalCount
                 }
-                pullRequests(first:1, filterBy: {createdBy: $creator}) {
-                  totalCount
+                pullRequests(first:1, states: OPEN) {
+                  nodes {
+                    author {
+                      login
+                    }
+                  }
                 }
               }
             }`;
            
             const result = await github.graphql(query, { owner, repo, creator });
            
-            const isNewContributor = result.repository.issues.totalCount + result.repository.pullRequests.totalCount === 1;
+            const issuesTotalCount = result.repository.issues.totalCount;
+            const prTotalCount = result.repository.pullRequests.nodes.filter(pr => pr.author.login === creator).length;
+           
+            const isNewContributor = issuesTotalCount + prTotalCount === 1;
            
             if (isNewContributor) {
               const message = `Welcome @${creator}! 🎉 Thank you for your first contribution to this project. We're excited to have you on board!`;
@@ -61,7 +68,6 @@ jobs:
                 });
               }
             }
-
 
       - name: Auto-assign issue
         if: github.event_name == 'issues' && github.event.action == 'opened'
