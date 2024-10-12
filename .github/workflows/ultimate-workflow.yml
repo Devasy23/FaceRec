@@ -1,0 +1,185 @@
+name: Ultimate Repository Automation
+
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+
+jobs:
+  greet-and-process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+
+      - name: Greet new contributor
+        if: github.event_name == 'pull_request' || github.event_name == 'issues'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const { owner, repo } = context.repo;
+            const creator = context.payload.sender.login;
+           
+            const query = `query($owner:String!, $repo:String!, $creator:String!) {
+              repository(owner:$owner, name:$repo) {
+                issues(first:1, filterBy: {createdBy: $creator}) {
+                  totalCount
+                }
+                pullRequests(first:1, filterBy: {createdBy: $creator}) {
+                  totalCount
+                }
+              }
+            }`;
+           
+            const result = await github.graphql(query, { owner, repo, creator });
+           
+            const isNewContributor = result.repository.issues.totalCount + result.repository.pullRequests.totalCount === 1;
+           
+            if (isNewContributor) {
+              const message = `Welcome @${creator}! 🎉 Thank you for your first contribution to this project. We're excited to have you on board!`;
+             
+              if (context.eventName === 'pull_request') {
+                github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: context.payload.pull_request.number,
+                  body: message
+                });
+              } else {
+                github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: context.payload.issue.number,
+                  body: message
+                });
+              }
+            }
+
+
+      - name: Auto-assign issue
+        if: github.event_name == 'issues' && github.event.action == 'opened'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(label => label.name);
+           
+            let assignee = '';
+            if (labels.includes('bug')) {
+              assignee = 'bug-fixer-username';
+            } else if (labels.includes('enhancement')) {
+              assignee = 'feature-developer-username';
+            } else {
+              assignee = 'default-assignee-username';
+            }
+           
+            github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              assignees: [assignee]
+            });
+
+
+      - name: Comment contributor stats
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const { owner, repo } = context.repo;
+            const creator = context.payload.pull_request.user.login;
+           
+            const query = `query($owner:String!, $repo:String!, $creator:String!) {
+              repository(owner:$owner, name:$repo) {
+                pullRequests(first:100, states:MERGED, orderBy:{field:CREATED_AT, direction:DESC}, author:$creator) {
+                  totalCount
+                  nodes {
+                    additions
+                    deletions
+                  }
+                }
+              }
+            }`;
+           
+            const result = await github.graphql(query, { owner, repo, creator });
+           
+            const prs = result.repository.pullRequests;
+            const totalPRs = prs.totalCount;
+            const recentPRs = prs.nodes.slice(0, 10);
+           
+            const totalAdditions = recentPRs.reduce((sum, pr) => sum + pr.additions, 0);
+            const totalDeletions = recentPRs.reduce((sum, pr) => sum + pr.deletions, 0);
+           
+            const message = `
+            📊 Contributor Stats for @${creator}:
+           
+            Total PRs Merged: ${totalPRs}
+            Recent Contributions (last 10 PRs):
+            - Lines Added: ${totalAdditions}
+            - Lines Deleted: ${totalDeletions}
+           
+            Keep up the great work! 🚀
+            `;
+           
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: context.payload.pull_request.number,
+              body: message
+            });
+
+
+      - name: Label based on file changes
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+           
+            const filesChanged = await github.rest.pulls.listFiles({
+              owner,
+              repo,
+              pull_number: prNumber
+            });
+           
+            const labels = new Set();
+           
+            filesChanged.data.forEach(file => {
+              if (file.filename.endsWith('.js')) labels.add('javascript');
+              if (file.filename.endsWith('.py')) labels.add('python');
+              if (file.filename.endsWith('.css')) labels.add('css');
+              if (file.filename.includes('test')) labels.add('test');
+              if (file.filename.includes('docs')) labels.add('documentation');
+            });
+           
+            if (labels.size > 0) {
+              github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: prNumber,
+                labels: Array.from(labels)
+              });
+            }
+
+
+      - name: Check for stale issues and PRs
+        uses: actions/stale@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-issue-message: 'This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+          stale-pr-message: 'This pull request has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+          stale-issue-label: 'no-issue-activity'
+          stale-pr-label: 'no-pr-activity'
+          days-before-stale: 60
+          days-before-close: 7
