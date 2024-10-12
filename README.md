@@ -32,7 +32,7 @@ These instructions will guide you through setting up the project on your local m
 
 ### Prerequisites
 
-Make sure you have **Python 3.7 or later** installed.
+Make sure you have **Python 3.10 or later** installed.
 
 ### Installation Steps
 
@@ -83,24 +83,8 @@ Your application will be available at `http://localhost:5000`.
 
 ## Sequence Diagram
 
-```plantuml
-@startuml
-actor User
-participant FastAPI
-participant Database
+![image.png](sequence-diagram.png)
 
-User -> FastAPI: POST request with image and metadata
-FastAPI -> Database: Store face entry
-User -> FastAPI: GET request for face entries
-FastAPI -> Database: Retrieve face entries
-User -> FastAPI: PUT request to update face entry
-FastAPI -> Database: Update face entry
-User -> FastAPI: GET request for specific entry
-FastAPI -> Database: Retrieve specific entry
-User -> FastAPI: DELETE request for entry
-FastAPI -> Database: Delete entry
-@enduml
-```
 ## 🗄️ Database Schema
 
 1. **Create a New Connection in MongoDB** using the following URL:
