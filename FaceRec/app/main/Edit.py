@@ -7,11 +7,9 @@ import os
 
 import cv2
 import requests
-from flask import Blueprint
-from flask import Response as flask_response
-from flask import redirect, render_template, request
+from flask import Blueprint, Response as flask_response, redirect, render_template, request, g, flash
 from PIL import Image
-
+from contextlib import contextmanager
 from FaceRec.config import Config
 
 Edit_blueprint = Blueprint(
@@ -21,191 +19,165 @@ Edit_blueprint = Blueprint(
     static_folder="../../static/",
 )
 
-cap = cv2.VideoCapture(0)
+
+@contextmanager
+def open_camera():
+    """Context manager to open and release the camera resource."""
+    cap = cv2.VideoCapture(0)
+    if not cap.isOpened():
+        raise Exception("Cannot open camera")
+    try:
+        yield cap
+    finally:
+        cap.release()
 
 
-# function for displaying live video
+def validate_input(data: dict) -> bool:
+    """Validates the input form data."""
+    if not data.get("EmployeeCode").isdigit():
+        flash("Invalid EmployeeCode. It should be numeric.")
+        return False
+    if not data.get("Name"):
+        flash("Name cannot be empty.")
+        return False
+    if not data.get("gender"):
+        flash("Gender cannot be empty.")
+        return False
+    if not data.get("Department"):
+        flash("Department cannot be empty.")
+        return False
+    return True
+
+
 def display_live_video():
-    """
-    Generator for displaying live video from the camera.
-
-    Yields frames as JPEG images.
-    """
-    while True:
-        success, frame = cap.read()  # Read a frame from the camera
-        if not success:
-            break
-        frame = cv2.flip(frame, 1)
-        ret, buffer = cv2.imencode(".jpg", frame)
-        frame = buffer.tobytes
-        if not ret:
-            break
-        yield (
-            b"--frame\r\n"
-            b"Content-Type: image/jpeg\r\n\r\n" +
-            bytearray(buffer) + b"\r\n\r\n"
-        )
+    """Generator for displaying live video from the camera."""
+    with open_camera() as cap:
+        while True:
+            success, frame = cap.read()
+            if not success:
+                break
+            frame = cv2.flip(frame, 1)
+            ret, buffer = cv2.imencode(".jpg", frame)
+            if not ret:
+                break
+            yield (
+                b"--frame\r\n"
+                b"Content-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n\r\n"
+            )
 
 
-# Route for displaying video
 @Edit_blueprint.route("/video_feed")
 def video_feed():
-    """Route for displaying live video from the camera.
-
-    Returns a multipart response with a JPEG image for each frame from the camera.
-    """
+    """Route for displaying live video from the camera."""
     return flask_response(
         display_live_video(),
-        mimetype="multipart/x-mixed-replace;boundary=frame",
+        mimetype="multipart/x-mixed-replace; boundary=frame",
     )
 
 
-# Route for capturing image from video
-@Edit_blueprint.route("/capture", methods=["GET", "POST"])
+@Edit_blueprint.route("/capture", methods=["POST"])
 def capture():
-    """Route for capturing an image from the video feed.
+    """Route for capturing an image from the video feed."""
+    form_data = {
+        "EmployeeCode": request.form.get("EmployeeCode", ""),
+        "Name": request.form.get("Name", ""),
+        "gender": request.form.get("gender", ""),
+        "Department": request.form.get("Department", "")
+    }
 
-    This route is used to capture a single frame from the video feed and save it to a file.
-    The frame is flipped horizontally before saving.
+    if not validate_input(form_data):
+        return redirect("capture")
 
-    The image is stored in a file specified by the `Config.image_data_file` variable.
+    try:
+        with open_camera() as cap:
+            ret, frame = cap.read()
+            if not ret:
+                flash("Failed to capture the image.")
+                return redirect("capture")
 
-    The response is a redirect to the "Image" route, which displays the captured image.
+            frame = cv2.flip(frame, 1)
+            _, buffer = cv2.imencode(".jpg", frame)
+            encoded_image = base64.b64encode(buffer).decode("utf-8")
+            
+            g.employee_data = form_data
+            g.encoded_image = encoded_image
 
-    The request is expected to be a POST request with the following form data:
-        - EmployeeCode: The employee code for the person in the image.
-        - Name: The name of the person in the image.
-        - gender: The gender of the person in the image.
-        - Department: The department of the person in the image.
-    """
-    global EmployeeCode
-    global Name
-    global gender
-    global Dept
-    global encoded_image
-    EmployeeCode = request.form.get("EmployeeCode", "")
-    Name = request.form.get("Name", "")
-    gender = request.form.get("gender", "")
-    Dept = request.form.get("Department", "")
-    ret, frame = cap.read(True)
-    frame = cv2.flip(frame, 1)
-    _, buffer = cv2.imencode(".jpg", frame)
-    encoded_image = base64.b64encode(buffer).decode("utf-8")
-    with open(Config.image_data_file, "w") as file:
-        json.dump({"base64_image": encoded_image}, file)
+            with open(Config.image_data_file, "w") as file:
+                json.dump({"base64_image": encoded_image}, file)
+    except Exception as e:
+        flash(f"Error capturing image: {e}")
+        return redirect("capture")
+
     return redirect("Image")
 
 
-# Route to display captured image
 @Edit_blueprint.route("/Image", methods=["GET"])
 def display_image():
-    """Route to display the captured image.
+    """Route to display the captured image."""
+    try:
+        if os.path.exists(Config.image_data_file):
+            with open(Config.image_data_file) as file:
+                image_data = json.load(file)
+            
+            encoded_image = image_data.get("base64_image", "")
+            decoded_image_data = base64.b64decode(encoded_image)
+            image = Image.open(io.BytesIO(decoded_image_data))
 
-    This route reads the image data from a file specified by the
-    `Config.image_data_file` variable and displays it in the template.
+            filename = "final.png"
+            image.save(os.path.join(Config.upload_image_path[0], filename), quality=100)
 
-    The image is saved to a file in the directory specified by the
-    `Config.upload_image_path` variable.
+            image_files = sorted(
+                os.listdir(Config.upload_image_path[0]),
+                key=lambda x: os.path.getatime(os.path.join(Config.upload_image_path[0], x)),
+                reverse=True
+            )
+            recent_image = image_files[0] if image_files else None
+        else:
+            recent_image = None
+    except Exception as e:
+        flash(f"Error loading image: {e}")
+        return render_template("index.html", image_path=None)
 
-    The most recent image is displayed.
-
-    The image is displayed in the template with the name "image_path".
-
-    Returns:
-        A rendered template with the image path.
-    """
-    if os.path.exists(Config.image_data_file):
-        with open(Config.image_data_file) as file:
-            image_data = json.load(file)
-        encoded_image = image_data.get("base64_image", "")
-        decoded_image_data = base64.b64decode(encoded_image)
-        image = Image.open(io.BytesIO(decoded_image_data))
-        filename = "final.png"
-        image.save(
-            os.path.join(
-                Config.upload_image_path[0],
-                filename,
-            ),
-            quality=100,
-        )
-        image = sorted(
-            os.listdir(Config.upload_image_path[0]),
-            key=lambda x: os.path.getatime(
-                os.path.join(Config.upload_image_path[0], x),
-            ),
-            reverse=True,
-        )
-    if image:
-        recent_image = image[0]
-        image_path = os.path.join(Config.upload_image_path[0], recent_image)
-    else:
-        recent_image = None
-    image_path = os.path.join(Config.upload_image_path[0], recent_image)
-    print("done")
+    image_path = os.path.join(Config.upload_image_path[0], recent_image) if recent_image else None
     return render_template("index.html", image_path=image_path)
 
 
 @Edit_blueprint.route("/edit/<int:EmployeeCode>", methods=["POST", "GET"])
 def edit(EmployeeCode):
-    """Edit an existing employee.
-
-    This route allows users to edit an existing employee record. The
-    employee is identified by the EmployeeCode, which is a required
-    parameter.
-
-    The route accepts both GET and POST requests. A GET request will
-    retrieve the employee data from the database and display it in
-    the template. A POST request will update the employee data in the
-    database with the values provided in the form.
-
-    The form data is expected to contain the following fields:
-
-    - Name
-    - gender
-    - Department
-
-    The image is expected to be stored in the `Config.image_data_file`
-    file.
-
-    The most recent image is displayed.
-
-    The image is displayed in the template with the name "image_path".
-
-    Returns:
-        A rendered template with the image path if the request is a
-        GET, or a redirect to the home page if the request is a POST.
-    """
+    """Edit an existing employee."""
     if request.method == "POST":
-        Name = request.form["Name"]
-        gender = request.form["Gender"]
-        Department = request.form["Department"]
-        with open(Config.image_data_file) as file:
-            image_data = json.load(file)
-        encoded_image = image_data.get("base64_image", "")
-        payload = {
-            "Name": Name,
-            "gender": gender,
-            "Department": Department,
-            "Image": encoded_image,
+        form_data = {
+            "Name": request.form["Name"],
+            "gender": request.form["Gender"],
+            "Department": request.form["Department"]
         }
-        # logger.info(payload)
+
+        if not validate_input(form_data):
+            return redirect(f"/edit/{EmployeeCode}")
+
         try:
-            url = requests.put(
-                f"http://127.0.0.1:8000/update/{EmployeeCode}",
-                json=payload,
-            )
-            url.status_code
-            # logger.info(url.json())
+            with open(Config.image_data_file) as file:
+                image_data = json.load(file)
 
+            encoded_image = image_data.get("base64_image", "")
+            payload = {**form_data, "Image": encoded_image}
+
+            response = requests.put(f"http://127.0.0.1:8000/update/{EmployeeCode}", json=payload)
+            if response.status_code != 200:
+                flash(f"Failed to update employee: {response.status_code}")
             return redirect("/")
-
         except requests.exceptions.RequestException as e:
-            print(f"Request failed: {e}")
-    response = requests.get(f"http://127.0.0.1:8000/read/{EmployeeCode}")
-    # logger.info(response.status_code)
-    # logger.info(response.json())
-    if response.status_code == 200:
-        employee_data = response.json()
-        return render_template("edit.html", employee_data=employee_data)
-    else:
-        return f"Error {response.status_code}: Failed to retrieve employee data."
+            flash(f"Request failed: {e}")
+            return redirect(f"/edit/{EmployeeCode}")
+
+    try:
+        response = requests.get(f"http://127.0.0.1:8000/read/{EmployeeCode}")
+        if response.status_code == 200:
+            employee_data = response.json()
+            return render_template("edit.html", employee_data=employee_data)
+        else:
+            flash(f"Error {response.status_code}: Failed to retrieve employee data.")
+            return render_template("edit.html", employee_data=None)
+    except requests.exceptions.RequestException as e:
+        flash(f"Error fetching employee data: {e}")
+        return render_template("edit.html", employee_data=None)
