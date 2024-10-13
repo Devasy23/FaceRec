@@ -4,12 +4,21 @@ $(document).ready(function () {
         const Name = $("#Name").val();
         const gender = $("#Gender").val();
         const Department = $("#Department").val();
+
+        let image = document.getElementById('Image');
+        rotateImage(image, 10); 
+
         $.ajax({
             type: "POST",
             url: "/capture",
-            data: {"EmployeeCode":EmployeeCode,"Name": Name ,"gender":gender,"Department":Department},  // Send Title value in the request
+            data: {
+                "EmployeeCode": EmployeeCode,
+                "Name": Name,
+                "gender": gender,
+                "Department": Department
+            },  
             success: function (response) {
-                console.log(response)
+                console.log(response);
                 updateImage();
                 enableImage();
             },
@@ -19,6 +28,10 @@ $(document).ready(function () {
         });
     });
 });
+
+function rotateImage(imageElement, degree) {
+    imageElement.style.transform = `rotate(${degree}deg)`;
+}
 
 $(document).ready(function () {
     $("#captureButton1").on("click", function () {
@@ -26,7 +39,7 @@ $(document).ready(function () {
             type: "POST",
             url: "/capturing",
             success: function (response) {
-                console.log(response)
+                console.log(response);
                 updateImage();
                 enableImage();
             },
@@ -37,26 +50,23 @@ $(document).ready(function () {
     });
 });
 
-
-
-
-
-
-function updateImage(){
+function updateImage() {
     var img = document.getElementById('Image');
     img.src = 'static/Images/uploads/final.png';
-    alert(img.src)
+    alert(img.src);
 }
 
-function enableImage(){
+function enableImage() {
     var imgElement = document.getElementById('Image');
     imgElement.removeAttribute('hidden');
     var uploadElement = document.getElementById('Upload');
     uploadElement.removeAttribute('hidden');
 }
+
 myButton.addEventListener("click", function () {
     myPopup.classList.add("show");
 });
+
 closePopup.addEventListener("click", function () {
     myPopup.classList.remove("show");
 });
