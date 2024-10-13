@@ -7,8 +7,11 @@ import os
 
 import cv2
 import requests
-from flask import Blueprint, Response as flask_response, redirect, render_template, request, g, flash
+from flask import Blueprint
+from flask import Response as flask_response
+from flask import flash, g, redirect, render_template, request
 from PIL import Image
+
 from FaceRec.config import Config
 
 Edit_blueprint = Blueprint(
@@ -20,6 +23,7 @@ Edit_blueprint = Blueprint(
 
 # Global variable for video capture
 cap = cv2.VideoCapture(0)
+
 
 def initialize_camera():
     """Initialize the camera resource if it's not already opened."""
@@ -85,7 +89,7 @@ def capture():
         "EmployeeCode": request.form.get("EmployeeCode", ""),
         "Name": request.form.get("Name", ""),
         "gender": request.form.get("gender", ""),
-        "Department": request.form.get("Department", "")
+        "Department": request.form.get("Department", ""),
     }
 
     if not validate_input(form_data):
@@ -101,7 +105,7 @@ def capture():
         frame = cv2.flip(frame, 1)
         _, buffer = cv2.imencode(".jpg", frame)
         encoded_image = base64.b64encode(buffer).decode("utf-8")
-        
+
         g.employee_data = form_data
         g.encoded_image = encoded_image
 
@@ -121,18 +125,21 @@ def display_image():
         if os.path.exists(Config.image_data_file):
             with open(Config.image_data_file) as file:
                 image_data = json.load(file)
-            
+
             encoded_image = image_data.get("base64_image", "")
             decoded_image_data = base64.b64decode(encoded_image)
             image = Image.open(io.BytesIO(decoded_image_data))
 
             filename = "final.png"
-            image.save(os.path.join(Config.upload_image_path[0], filename), quality=100)
+            image.save(os.path.join(
+                Config.upload_image_path[0], filename), quality=100)
 
             image_files = sorted(
                 os.listdir(Config.upload_image_path[0]),
-                key=lambda x: os.path.getatime(os.path.join(Config.upload_image_path[0], x)),
-                reverse=True
+                key=lambda x: os.path.getatime(
+                    os.path.join(Config.upload_image_path[0], x)
+                ),
+                reverse=True,
             )
             recent_image = image_files[0] if image_files else None
         else:
@@ -141,7 +148,11 @@ def display_image():
         flash(f"Error loading image: {e}")
         return render_template("index.html", image_path=None)
 
-    image_path = os.path.join(Config.upload_image_path[0], recent_image) if recent_image else None
+    image_path = (
+        os.path.join(Config.upload_image_path[0], recent_image)
+        if recent_image
+        else None
+    )
     return render_template("index.html", image_path=image_path)
 
 
@@ -152,7 +163,7 @@ def edit(EmployeeCode):
         form_data = {
             "Name": request.form["Name"],
             "gender": request.form["Gender"],
-            "Department": request.form["Department"]
+            "Department": request.form["Department"],
         }
 
         if not validate_input(form_data):
@@ -165,7 +176,9 @@ def edit(EmployeeCode):
             encoded_image = image_data.get("base64_image", "")
             payload = {**form_data, "Image": encoded_image}
 
-            response = requests.put(f"http://127.0.0.1:8000/update/{EmployeeCode}", json=payload)
+            response = requests.put(
+                f"http://127.0.0.1:8000/update/{EmployeeCode}", json=payload
+            )
             if response.status_code != 200:
                 flash(f"Failed to update employee: {response.status_code}")
             return redirect("/")
@@ -179,9 +192,9 @@ def edit(EmployeeCode):
             employee_data = response.json()
             return render_template("edit.html", employee_data=employee_data)
         else:
-            flash(f"Error {response.status_code}: Failed to retrieve employee data.")
+            flash(
+                f"Error {response.status_code}: Failed to retrieve employee data.")
             return render_template("edit.html", employee_data=None)
     except requests.exceptions.RequestException as e:
         flash(f"Error fetching employee data: {e}")
         return render_template("edit.html", employee_data=None)
-
