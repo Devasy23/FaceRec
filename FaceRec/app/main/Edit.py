@@ -9,7 +9,6 @@ import cv2
 import requests
 from flask import Blueprint, Response as flask_response, redirect, render_template, request, g, flash
 from PIL import Image
-from contextlib import contextmanager
 from FaceRec.config import Config
 
 Edit_blueprint = Blueprint(
@@ -19,16 +18,20 @@ Edit_blueprint = Blueprint(
     static_folder="../../static/",
 )
 
+# Global variable for video capture
+cap = cv2.VideoCapture(0)
 
-@contextmanager
-def open_camera():
-    """Context manager to open and release the camera resource."""
-    cap = cv2.VideoCapture(0)
+def initialize_camera():
+    """Initialize the camera resource if it's not already opened."""
+    global cap
     if not cap.isOpened():
-        raise Exception("Cannot open camera")
-    try:
-        yield cap
-    finally:
+        cap.open(0)
+
+
+def release_camera():
+    """Release the camera resource when no longer needed."""
+    global cap
+    if cap.isOpened():
         cap.release()
 
 
@@ -51,19 +54,19 @@ def validate_input(data: dict) -> bool:
 
 def display_live_video():
     """Generator for displaying live video from the camera."""
-    with open_camera() as cap:
-        while True:
-            success, frame = cap.read()
-            if not success:
-                break
-            frame = cv2.flip(frame, 1)
-            ret, buffer = cv2.imencode(".jpg", frame)
-            if not ret:
-                break
-            yield (
-                b"--frame\r\n"
-                b"Content-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n\r\n"
-            )
+    initialize_camera()  # Ensure camera is initialized
+    while True:
+        success, frame = cap.read()
+        if not success:
+            break
+        frame = cv2.flip(frame, 1)
+        ret, buffer = cv2.imencode(".jpg", frame)
+        if not ret:
+            break
+        yield (
+            b"--frame\r\n"
+            b"Content-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n\r\n"
+        )
 
 
 @Edit_blueprint.route("/video_feed")
@@ -89,21 +92,21 @@ def capture():
         return redirect("capture")
 
     try:
-        with open_camera() as cap:
-            ret, frame = cap.read()
-            if not ret:
-                flash("Failed to capture the image.")
-                return redirect("capture")
+        initialize_camera()  # Ensure camera is initialized
+        ret, frame = cap.read()
+        if not ret:
+            flash("Failed to capture the image.")
+            return redirect("capture")
 
-            frame = cv2.flip(frame, 1)
-            _, buffer = cv2.imencode(".jpg", frame)
-            encoded_image = base64.b64encode(buffer).decode("utf-8")
-            
-            g.employee_data = form_data
-            g.encoded_image = encoded_image
+        frame = cv2.flip(frame, 1)
+        _, buffer = cv2.imencode(".jpg", frame)
+        encoded_image = base64.b64encode(buffer).decode("utf-8")
+        
+        g.employee_data = form_data
+        g.encoded_image = encoded_image
 
-            with open(Config.image_data_file, "w") as file:
-                json.dump({"base64_image": encoded_image}, file)
+        with open(Config.image_data_file, "w") as file:
+            json.dump({"base64_image": encoded_image}, file)
     except Exception as e:
         flash(f"Error capturing image: {e}")
         return redirect("capture")
@@ -181,3 +184,4 @@ def edit(EmployeeCode):
     except requests.exceptions.RequestException as e:
         flash(f"Error fetching employee data: {e}")
         return render_template("edit.html", employee_data=None)
+
