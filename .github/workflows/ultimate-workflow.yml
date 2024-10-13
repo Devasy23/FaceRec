@@ -108,7 +108,7 @@ jobs:
       - name: Collect PR stats
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.PAT_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             try {
               const { owner, repo } = context.repo;
