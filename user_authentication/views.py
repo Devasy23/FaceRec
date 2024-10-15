@@ -1,8 +1,8 @@
-from .forms import CustomUserCreationForm, LoginForm
-from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import redirect, render
+
+from .forms import CustomUserCreationForm, LoginForm
 
 
 def is_admin(user):
