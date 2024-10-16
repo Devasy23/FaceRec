@@ -1,0 +1,17 @@
+changelog_type: pull_request
+header_prefix: '##'
+version_prefix: '['
+version_suffix: ']'
+sections:
+  - section: '### Added'
+    labels: ['added', 'feature', 'enhancement']
+  - section: '### Changed'
+    labels: ['changed', 'refactor']
+  - section: '### Fixed'
+    labels: ['fixed', 'bug']
+  - section: '### Removed'
+    labels: ['removed', 'deprecated']
+include_unlabeled_changes: true
+unlabeled_group_title: 'Other Changes'
+pull_request_title_regex: '^Release:.*\\(v[0-9]+\\.[0-9]+\\.[0-9]+\\)'
+version_regex: 'v([0-9]+\\.[0-9]+\\.[0-9]+)'

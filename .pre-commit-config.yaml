@@ -1,0 +1,15 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.8.0  # Use the latest stable version of Black
+    hooks:
+      - id: black
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/hhatto/autopep8
+    rev: v2.3.1  # Use the latest stable version of autopep8
+    hooks:
+      - id: autopep8

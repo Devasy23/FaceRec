@@ -1,0 +1,38 @@
+name: Changelog CI
+
+# Trigger on pull request event
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository content
+      - uses: actions/checkout@v2
+
+      # Run Changelog CI action
+      - name: Run Changelog CI
+        uses: saadmk11/changelog-ci@v1.1.2
+        with:
+          changelog_filename: CHANGELOG.md
+          committer_username: github-actions[bot]
+          committer_email: github-actions[bot]@users.noreply.github.com
+          config_file: changelog-config.yaml
+          # GitHub token for authorization
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        # Create a new release
+    #   - name: Create Release
+    #     id: create_release
+    #     uses: actions/create-release@v1
+    #     env:
+    #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #     with:
+    #         tag_name: ${{ github.run_number }}
+    #         release_name: Release ${{ github.run_number }}
+    #         draft: false
+    #         prerelease: false

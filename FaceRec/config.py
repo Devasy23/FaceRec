@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
+# This class named Config is likely used for storing configuration settings or parameters in a Python
+# program.
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY")
     DEBUG = (True,)

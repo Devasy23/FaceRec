@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 from unittest.mock import MagicMock, patch
 
@@ -22,6 +24,16 @@ def test_face_lifecycle(
     mock_find_one_and_delete: MagicMock,
 ):
     # Register two new faces
+    """Test the entire lifecycle of a face entry:
+
+    1. Register a new face entry.
+    2. Get all face entries.
+    3. Update a face entry.
+    4. Get all face entries again.
+    5. Delete a face entry.
+    6. Check that only one face entry remains.
+    7. Delete the remaining face entry.
+    """
     mock_doc = {
         "_id": "65e6284d01f95cd96ea334a7",
         "EmployeeCode": "1",

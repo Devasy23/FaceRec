@@ -1,3 +1,15 @@
+# Version: v0.1.6
+
+* [#1](https://github.com/Devasy23/FaceRec/pull/1): Merge code mark 1
+* [#3](https://github.com/Devasy23/FaceRec/pull/3): Merge code mark 1
+* [#4](https://github.com/Devasy23/FaceRec/pull/4): Add issue and pull request templates
+* [#5](https://github.com/Devasy23/FaceRec/pull/5): Merge update
+* [#6](https://github.com/Devasy23/FaceRec/pull/6): Refactor code, add tests, and update dependencies
+* [#27](https://github.com/Devasy23/FaceRec/pull/27): Preliminary code for vector search
+* [#31](https://github.com/Devasy23/FaceRec/pull/31): Add Face Recognition System Proposal and Project Plan
+* [#39](https://github.com/Devasy23/FaceRec/pull/39): Update sonarcloud.yml
+
+
 ## [0.0.1] - 2024-03-08 - 2:30
 
 ### Added
@@ -50,3 +62,16 @@
 
 ### Removed
 - Removed deprecated code and unused dependencies from the project.
+
+## [0.1.4] - 2024-03-16 - 23:00
+
+### Added
+- Implemented a new `recognize_Face` endpoint in [`route.py`](API/route.py). This endpoint accepts a base64 string as input, converts it into embeddings, and performs a vector search query on the MongoDB Atlas database. Changes made by @Devasy23.
+- Added a new `vector_search` function in [`database.py`](API/database.py). This function performs a vector similarity search on the MongoDB Atlas database using Euclidean distance as the similarity measure. Changes made by @Devasy23.
+- Updated [`index.ipynb`](index.ipynb) to include examples and usage of the new `recognize_Face` endpoint and `vector_search` function. Changes made by @Devasy23.
+
+### Changed
+- Updated the `Database` class in [`database.py`](API/database.py) to include the new `vector_search` function. Changes made by @Devasy23.
+
+### Fixed
+- Resolved various bugs and issues identified during the implementation and testing of the new features. Fixes made by @Devasy23.

@@ -16,6 +16,7 @@
           </div>
           <div class="col" style="padding-top: 15px;padding-left: 450px;">
             <center><a href="{{url_for('flk_blueprint .add_employee')}}"><button class="btn btn-primary bg-primary.bg-gradient" style="background-color:#330c61;; border: 0px; justify-content: space-around;" class="img-thumbnail">Add Employee</button></center></a>
+            <a href="{{url_for('Face_Rec_blueprint.recognize_employee')}}"><button class="btn btn-primary bg-primary.bg-gradient" style="background-color:#330c61;; border: 0px; justify-content: space-around;" class="img-thumbnail">Recognize Employee</button></center></a>
             </center>
             </div>
         </div>
@@ -29,7 +30,7 @@
                 <th>Gender:</th>
                 <th>Department:</th>
                 <th colspan="10">Actions</th>
-                
+
                 <!-- <th>Image:</th> -->
             </tr>
                 {%for Employee in employees %}
@@ -40,13 +41,13 @@
                 <td>{{Employee.Department}}</td>
                 <!-- <td><img src="data:image/png;base64,{{Employee.image}}" alt=" Image" height="150" width="200"></td> -->
                 <td><a href="{{url_for('flk_blueprint .Delete',EmployeeCode=Employee.EmployeeCode)}}"><button id="Delete" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail" style="background-color:#330c61;; border: 0px; justify-content: space-around;">Delete</button></a></td>
-                <td><a href="{{url_for('flk_blueprint .edit',EmployeeCode=Employee.EmployeeCode)}}"><button id="Edit" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"style="background-color:#330c61;; border: 0px; justify-content: space-around;">Edit</button></a></td>
+                <td><a href="{{url_for('Edit_blueprint.edit',EmployeeCode=Employee.EmployeeCode)}}"><button id="Edit" class="btn btn-primary bg-primary.bg-gradient" class="img-thumbnail"style="background-color:#330c61;; border: 0px; justify-content: space-around;">Edit</button></a></td>
             </tr>
                 {%endfor%}
-            
+
           </table><br>
       </div>
-      
+
 </body>
 <script src="../static/index.js"></script>
 </html>
