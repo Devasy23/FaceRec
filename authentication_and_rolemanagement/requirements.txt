@@ -1,0 +1,10 @@
+Flask==2.0.3
+Flask-SQLAlchemy==2.5.1
+Flask-JWT-Extended==4.4.4
+Flask-Migrate==3.1.0
+Flask-Limiter==2.3.1
+FastAPI==0.65.1
+uvicorn==0.14.0
+python-dotenv==0.19.1
+Werkzeug==2.0.3
+
