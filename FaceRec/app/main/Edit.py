@@ -23,8 +23,13 @@ Edit_blueprint = Blueprint(
 
 cap = cv2.VideoCapture(0)
 
+# Check if the camera opened successfully
+if not cap.isOpened():
+    print("Error: Could not open video capture.")
+    # You can raise an exception or handle it as needed
 
-# function for displaying live video
+
+# Function for displaying live video
 def display_live_video():
     """
     Generator for displaying live video from the camera.
@@ -34,11 +39,12 @@ def display_live_video():
     while True:
         success, frame = cap.read()  # Read a frame from the camera
         if not success:
+            print("Error: Failed to capture image.")
             break
         frame = cv2.flip(frame, 1)
         ret, buffer = cv2.imencode(".jpg", frame)
-        frame = buffer.tobytes
         if not ret:
+            print("Error: Failed to encode image.")
             break
         yield (
             b"--frame\r\n"
@@ -83,16 +89,27 @@ def capture():
     global gender
     global Dept
     global encoded_image
+
     EmployeeCode = request.form.get("EmployeeCode", "")
     Name = request.form.get("Name", "")
     gender = request.form.get("gender", "")
     Dept = request.form.get("Department", "")
-    ret, frame = cap.read(True)
-    frame = cv2.flip(frame, 1)
-    _, buffer = cv2.imencode(".jpg", frame)
-    encoded_image = base64.b64encode(buffer).decode("utf-8")
-    with open(Config.image_data_file, "w") as file:
-        json.dump({"base64_image": encoded_image}, file)
+
+    try:
+        ret, frame = cap.read(True)
+        if not ret:
+            print("Error: Could not read frame from camera.")
+            return redirect("Image")  # or handle error appropriately
+
+        frame = cv2.flip(frame, 1)
+        _, buffer = cv2.imencode(".jpg", frame)
+        encoded_image = base64.b64encode(buffer).decode("utf-8")
+
+        with open(Config.image_data_file, "w") as file:
+            json.dump({"base64_image": encoded_image}, file)
+    except Exception as e:
+        print(f"Error while capturing image: {e}")
+
     return redirect("Image")
 
 
@@ -114,35 +131,49 @@ def display_image():
     Returns:
         A rendered template with the image path.
     """
-    if os.path.exists(Config.image_data_file):
-        with open(Config.image_data_file) as file:
-            image_data = json.load(file)
-        encoded_image = image_data.get("base64_image", "")
-        decoded_image_data = base64.b64decode(encoded_image)
-        image = Image.open(io.BytesIO(decoded_image_data))
-        filename = "final.png"
-        image.save(
-            os.path.join(
-                Config.upload_image_path[0],
-                filename,
-            ),
-            quality=100,
-        )
-        image = sorted(
-            os.listdir(Config.upload_image_path[0]),
-            key=lambda x: os.path.getatime(
-                os.path.join(Config.upload_image_path[0], x),
-            ),
-            reverse=True,
-        )
-    if image:
-        recent_image = image[0]
-        image_path = os.path.join(Config.upload_image_path[0], recent_image)
-    else:
-        recent_image = None
-    image_path = os.path.join(Config.upload_image_path[0], recent_image)
-    print("done")
-    return render_template("index.html", image_path=image_path)
+    try:
+        if os.path.exists(Config.image_data_file):
+            with open(Config.image_data_file) as file:
+                image_data = json.load(file)
+
+            encoded_image = image_data.get("base64_image", "")
+            decoded_image_data = base64.b64decode(encoded_image)
+            image = Image.open(io.BytesIO(decoded_image_data))
+            filename = "final.png"
+            image.save(
+                os.path.join(
+                    Config.upload_image_path[0],
+                    filename,
+                ),
+                quality=100,
+            )
+
+            image = sorted(
+                os.listdir(Config.upload_image_path[0]),
+                key=lambda x: os.path.getatime(
+                    os.path.join(Config.upload_image_path[0], x),
+                ),
+                reverse=True,
+            )
+
+            if image:
+                recent_image = image[0]
+                image_path = os.path.join(
+                    Config.upload_image_path[0], recent_image)
+            else:
+                recent_image = None
+                image_path = ""
+        else:
+            print(f"Error: {Config.image_data_file} does not exist.")
+            recent_image = None
+            image_path = ""
+
+        return render_template("index.html", image_path=image_path)
+    except Exception as e:
+        print(f"Error while displaying image: {e}")
+        return render_template(
+            "index.html", image_path=""
+        )  # Show a default image or handle error
 
 
 @Edit_blueprint.route("/edit/<int:EmployeeCode>", methods=["POST", "GET"])
@@ -179,33 +210,44 @@ def edit(EmployeeCode):
         Name = request.form["Name"]
         gender = request.form["Gender"]
         Department = request.form["Department"]
-        with open(Config.image_data_file) as file:
-            image_data = json.load(file)
-        encoded_image = image_data.get("base64_image", "")
-        payload = {
-            "Name": Name,
-            "gender": gender,
-            "Department": Department,
-            "Image": encoded_image,
-        }
-        # logger.info(payload)
         try:
-            url = requests.put(
-                f"http://127.0.0.1:8000/update/{EmployeeCode}",
-                json=payload,
+            with open(Config.image_data_file) as file:
+                image_data = json.load(file)
+
+            encoded_image = image_data.get("base64_image", "")
+            payload = {
+                "Name": Name,
+                "gender": gender,
+                "Department": Department,
+                "Image": encoded_image,
+            }
+            try:
+                url = requests.put(
+                    f"http://127.0.0.1:8000/update/{EmployeeCode}",
+                    json=payload,
+                )
+                if url.status_code == 200:
+                    return redirect("/")
+                else:
+                    print(
+                        f"Error: Failed to update employee data with status code {url.status_code}"
+                    )
+            except requests.exceptions.RequestException as e:
+                print(f"Request failed: {e}")
+
+        except Exception as e:
+            print(f"Error while processing employee data: {e}")
+
+    try:
+        response = requests.get(f"http://127.0.0.1:8000/read/{EmployeeCode}")
+        if response.status_code == 200:
+            employee_data = response.json()
+            return render_template("edit.html", employee_data=employee_data)
+        else:
+            print(
+                f"Error: Failed to retrieve employee data with status code {response.status_code}"
             )
-            url.status_code
-            # logger.info(url.json())
-
-            return redirect("/")
-
-        except requests.exceptions.RequestException as e:
-            print(f"Request failed: {e}")
-    response = requests.get(f"http://127.0.0.1:8000/read/{EmployeeCode}")
-    # logger.info(response.status_code)
-    # logger.info(response.json())
-    if response.status_code == 200:
-        employee_data = response.json()
-        return render_template("edit.html", employee_data=employee_data)
-    else:
-        return f"Error {response.status_code}: Failed to retrieve employee data."
+            return f"Error {response.status_code}: Failed to retrieve employee data."
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return "Error: Could not retrieve employee data."

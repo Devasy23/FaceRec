@@ -68,15 +68,21 @@ def init_logging_config():
             formatter = logging.Formatter(log_fmt)
             return formatter.format(record)
 
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    try:
+        logger = logging.getLogger()
+        logger.setLevel(logging.DEBUG)
 
-    stderr_handler = logging.StreamHandler()
-    stderr_handler.setLevel(logging.DEBUG)
-    stderr_handler.setFormatter(CustomFormatter())
-    logger.addHandler(stderr_handler)
+        stderr_handler = logging.StreamHandler()
+        stderr_handler.setLevel(logging.DEBUG)
+        stderr_handler.setFormatter(CustomFormatter())
+        logger.addHandler(stderr_handler)
 
-    file_handler = logging.FileHandler("app.log", mode="w")
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(CustomFormatter(True))
-    logger.addHandler(file_handler)
+        file_handler = logging.FileHandler("app.log", mode="w")
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(CustomFormatter(True))
+        logger.addHandler(file_handler)
+
+        logging.info("Logging configuration initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing logging configuration: {e}")
+        logging.error(f"Error initializing logging configuration: {e}")

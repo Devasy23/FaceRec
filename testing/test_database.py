@@ -17,7 +17,6 @@ init_logging_config()
 def test_vector_search():
     """
     Test that the vector_search function returns the correct result.
-
     """
 
     mock_result = [

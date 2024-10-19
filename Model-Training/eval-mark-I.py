@@ -10,11 +10,15 @@ from sklearn.metrics.pairwise import euclidean_distances
 
 # Function to load and preprocess images
 def load_and_preprocess_image(img_path, target_size=(160, 160)):
-    img = image.load_img(img_path, target_size=target_size)
-    img_array = image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array /= 255.0
-    return img_array
+    try:
+        img = image.load_img(img_path, target_size=target_size)
+        img_array = image.img_to_array(img)
+        img_array = np.expand_dims(img_array, axis=0)
+        img_array /= 255.0
+        return img_array
+    except Exception as e:
+        print(f"Error loading image {img_path}: {e}")
+        return None
 
 
 # Function to generate embeddings
@@ -30,6 +34,8 @@ def generate_embeddings(model, dataset_path):
         for img_name in os.listdir(class_path):
             img_path = os.path.join(class_path, img_name)
             img_array = load_and_preprocess_image(img_path)
+            if img_array is None:
+                continue
             embedding = model.predict(img_array)
             embeddings.append(embedding[0])
             labels.append(class_name)
@@ -58,7 +64,7 @@ def calculate_intra_cluster_distances(embeddings, labels):
     return np.array(distances)
 
 
-# Load the pre-trained FaceNet model (replace 'facenet_model.h5' with your model file)
+# Load the pre-trained FaceNet model
 model_path = "facenet_model.h5"
 model = load_model(model_path)
 
@@ -68,7 +74,7 @@ dataset_path = "path_to_your_dataset"
 # Generate embeddings for the original model
 embeddings_original, labels = generate_embeddings(model, dataset_path)
 
-# Load the fine-tuned model (replace 'facenet_model_finetuned.h5' with your fine-tuned model file)
+# Load the fine-tuned model
 finetuned_model_path = "facenet_model_finetuned.h5"
 finetuned_model = load_model(finetuned_model_path)
 

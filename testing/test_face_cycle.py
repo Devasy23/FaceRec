@@ -49,8 +49,10 @@ def test_face_lifecycle(
     mock_find_one.return_value = mock_doc
     mock_update_one.return_value = MagicMock(modified_count=1)
     mock_find_one_and_delete.return_value = mock_doc
+
     with open("./test-faces/devansh.jpg", "rb") as image_file:
         encoded_string1 = base64.b64encode(image_file.read()).decode("utf-8")
+
     response1 = client.post(
         "/create_new_faceEntry",
         json={
@@ -66,6 +68,7 @@ def test_face_lifecycle(
 
     with open("./test-faces/devansh.jpg", "rb") as image_file:
         encoded_string2 = base64.b64encode(image_file.read()).decode("utf-8")
+
     response2 = client.post(
         "/create_new_faceEntry",
         json={
@@ -83,9 +86,6 @@ def test_face_lifecycle(
     response = client.get("/Data/")
     assert response.status_code == 200
     assert len(response.json()) == 2
-
-    with open("./test-faces/devansh.jpg", "rb") as image_file:
-        encoded_string2 = base64.b64encode(image_file.read()).decode("utf-8")
 
     # Update a face
     response = client.put(
