@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from datetime import datetime
+import logging
+from pymongo import MongoClient, errors
 
-from pymongo import MongoClient
-
+# Initialize logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class Database:
     def __init__(self, uri="mongodb://localhost:27017/", db_name="ImageDB"):
@@ -14,8 +17,13 @@ class Database:
             uri (str): The uri of the MongoDB server. Defaults to 'mongodb://localhost:27017/'.
             db_name (str): The name of the MongoDB database. Defaults to 'ImageDB'.
         """
-        self.client = MongoClient(uri)
-        self.db = self.client[db_name]
+        try:
+            self.client = MongoClient(uri)
+            self.db = self.client[db_name]
+            logger.info("Successfully connected to MongoDB.")
+        except errors.ConnectionError as e:
+            logger.error(f"Failed to connect to MongoDB: {e}")
+            raise
 
     def find(self, collection, query=None):
         """
@@ -28,7 +36,11 @@ class Database:
         Returns:
             pymongo.cursor.Cursor: A cursor pointing to the results of the query.
         """
-        return self.db[collection].find(query)
+        try:
+            return self.db[collection].find(query)
+        except errors.PyMongoError as e:
+            logger.error(f"Error finding documents in {collection}: {e}")
+            return None
 
     def insert_one(self, collection, document):
         """
@@ -41,8 +53,11 @@ class Database:
         Returns:
             pymongo.results.InsertOneResult: The result of the insertion.
         """
-
-        return self.db[collection].insert_one(document)
+        try:
+            return self.db[collection].insert_one(document)
+        except errors.PyMongoError as e:
+            logger.error(f"Error inserting document into {collection}: {e}")
+            return None
 
     def find_one(self, collection, filter, projection=None):
         """
@@ -56,7 +71,11 @@ class Database:
         Returns:
             dict: The document that matches the query, or None if no documents match.
         """
-        return self.db[collection].find_one(filter=filter, projection=projection)
+        try:
+            return self.db[collection].find_one(filter=filter, projection=projection)
+        except errors.PyMongoError as e:
+            logger.error(f"Error finding document in {collection}: {e}")
+            return None
 
     def find_one_and_delete(self, collection, query):
         """
@@ -69,7 +88,11 @@ class Database:
         Returns:
             dict: The document that matches the query, or None if no documents match.
         """
-        return self.db[collection].find_one_and_delete(query)
+        try:
+            return self.db[collection].find_one_and_delete(query)
+        except errors.PyMongoError as e:
+            logger.error(f"Error deleting document in {collection}: {e}")
+            return None
 
     def update_one(self, collection, query, update):
         """
@@ -83,10 +106,12 @@ class Database:
         Returns:
             pymongo.results.UpdateResult: The result of the update.
         """
+        try:
+            return self.db[collection].update_one(query, update)
+        except errors.PyMongoError as e:
+            logger.error(f"Error updating document in {collection}: {e}")
+            return None
 
-        return self.db[collection].update_one(query, update)
-
-    # add a function for pipeline aggregation vector search
     def vector_search(self, collection, embedding):
         """
         Perform a vector similarity search on the given collection.
@@ -98,27 +123,30 @@ class Database:
         Returns:
             list: A list of documents with the closest embedding to the query vector, sorted by score.
         """
-
-        result = self.db[collection].aggregate(
-            [
-                {
-                    "$vectorSearch": {
-                        "index": "vector_index",
-                        "path": "embedding",
-                        "queryVector": embedding,
-                        "numCandidates": 20,
-                        "limit": 20,
+        try:
+            result = self.db[collection].aggregate(
+                [
+                    {
+                        "$vectorSearch": {
+                            "index": "vector_index",
+                            "path": "embedding",
+                            "queryVector": embedding,
+                            "numCandidates": 20,
+                            "limit": 20,
+                        },
                     },
-                },
-                {
-                    "$project": {
-                        "_id": 0,
-                        "Name": 1,
-                        "Image": 1,
-                        "score": {"$meta": "vectorSearchScore"},
+                    {
+                        "$project": {
+                            "_id": 0,
+                            "Name": 1,
+                            "Image": 1,
+                            "score": {"$meta": "vectorSearchScore"},
+                        },
                     },
-                },
-            ],
-        )
-        result_arr = [i for i in result]
-        return result_arr
+                ],
+            )
+            result_arr = [i for i in result]
+            return result_arr
+        except errors.PyMongoError as e:
+            logger.error(f"Error performing vector search in {collection}: {e}")
+            return []
