@@ -3,8 +3,8 @@ from __future__ import annotations
 import base64
 import io
 import json
-import os
 import logging
+import os
 
 import cv2
 import requests
@@ -27,6 +27,7 @@ employee_blueprint = Blueprint(
 )
 
 cap = cv2.VideoCapture(0)
+
 
 # Function for displaying live video
 def display_live_video():
@@ -51,6 +52,7 @@ def display_live_video():
             bytearray(buffer) + b"\r\n\r\n"
         )
 
+
 # Route for displaying video
 @employee_blueprint.route("/video_feed")
 def video_feed():
@@ -64,6 +66,7 @@ def video_feed():
         mimetype="multipart/x-mixed-replace;boundary=frame",
     )
 
+
 # Route for capturing image from video
 @employee_blueprint.route("/capture", methods=["GET", "POST"])
 def capture():
@@ -76,13 +79,13 @@ def capture():
     Name = request.form.get("Name", "")
     gender = request.form.get("gender", "")
     Dept = request.form.get("Department", "")
-    
+
     try:
         ret, frame = cap.read()
         if not ret:
             logger.error("Failed to capture frame for employee image.")
             return jsonify({"error": "Failed to capture image"}), 500
-        
+
         frame = cv2.flip(frame, 1)
         _, buffer = cv2.imencode(".jpg", frame)
         encoded_image = base64.b64encode(buffer).decode("utf-8")
@@ -96,6 +99,7 @@ def capture():
     except Exception as e:
         logger.error(f"Error capturing image: {e}")
         return jsonify({"error": "Error capturing image"}), 500
+
 
 # Route to display captured image
 @employee_blueprint.route("/Image", methods=["GET"])
@@ -114,20 +118,28 @@ def display_image():
             decoded_image_data = base64.b64decode(encoded_image)
             image = Image.open(io.BytesIO(decoded_image_data))
             filename = "final.png"
-            image.save(os.path.join(Config.upload_image_path[0], filename), quality=100)
+            image.save(os.path.join(
+                Config.upload_image_path[0], filename), quality=100)
 
             recent_images = sorted(
                 os.listdir(Config.upload_image_path[0]),
-                key=lambda x: os.path.getatime(os.path.join(Config.upload_image_path[0], x)),
+                key=lambda x: os.path.getatime(
+                    os.path.join(Config.upload_image_path[0], x)
+                ),
                 reverse=True,
             )
-            image_path = os.path.join(Config.upload_image_path[0], recent_images[0]) if recent_images else None
+            image_path = (
+                os.path.join(Config.upload_image_path[0], recent_images[0])
+                if recent_images
+                else None
+            )
             logger.info("Image displayed successfully.")
         except Exception as e:
             logger.error(f"Error displaying image: {e}")
             return jsonify({"error": "Error displaying image"}), 500
-    
+
     return render_template("index.html", image_path=image_path)
+
 
 # Route for recognition capturing
 @employee_blueprint.route("/capturing", methods=["GET", "POST"])
@@ -155,6 +167,7 @@ def capturing():
         logger.error(f"Error capturing recognition image: {e}")
         return jsonify({"error": "Error capturing recognition image"}), 500
 
+
 # Route to display captured image for recognition
 @employee_blueprint.route("/Pic", methods=["GET", "POST"])
 def display_pic():
@@ -167,18 +180,28 @@ def display_pic():
             decoded_image_data = base64.b64decode(encoded_image)
             image = Image.open(io.BytesIO(decoded_image_data))
             filename = "final.png"
-            image.save(os.path.join(Config.upload_image_path[0], filename), quality=100)
+            image.save(os.path.join(
+                Config.upload_image_path[0], filename), quality=100)
 
             recent_images = sorted(
                 os.listdir(Config.upload_image_path[0]),
-                key=lambda x: os.path.getatime(os.path.join(Config.upload_image_path[0], x)),
+                key=lambda x: os.path.getatime(
+                    os.path.join(Config.upload_image_path[0], x)
+                ),
                 reverse=True,
             )
-            image_path = os.path.join(Config.upload_image_path[0], recent_images[0]) if recent_images else None
-            
+            image_path = (
+                os.path.join(Config.upload_image_path[0], recent_images[0])
+                if recent_images
+                else None
+            )
+
             logger.info("Displaying recognition image.")
             files = {
-                "Face": open(os.path.join(Config.upload_image_path[0], "final.png"), "rb"),
+                "Face": open(
+                    os.path.join(
+                        Config.upload_image_path[0], "final.png"), "rb"
+                ),
             }
             fastapi_url = "http://127.0.0.1:8000/recognize_face"
             req = requests.post(fastapi_url, files=files)

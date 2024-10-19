@@ -10,6 +10,7 @@ from API.route import router
 
 client = TestClient(router)
 
+
 @patch("API.database.Database.find_one_and_delete")
 @patch("API.database.Database.update_one")
 @patch("API.database.Database.find_one")
@@ -51,7 +52,7 @@ def test_face_lifecycle(
 
     with open("./test-faces/devansh.jpg", "rb") as image_file:
         encoded_string1 = base64.b64encode(image_file.read()).decode("utf-8")
-    
+
     response1 = client.post(
         "/create_new_faceEntry",
         json={
@@ -67,7 +68,7 @@ def test_face_lifecycle(
 
     with open("./test-faces/devansh.jpg", "rb") as image_file:
         encoded_string2 = base64.b64encode(image_file.read()).decode("utf-8")
-    
+
     response2 = client.post(
         "/create_new_faceEntry",
         json={

@@ -28,6 +28,7 @@ if not cap.isOpened():
     print("Error: Could not open video capture.")
     # You can raise an exception or handle it as needed
 
+
 # Function for displaying live video
 def display_live_video():
     """
@@ -51,6 +52,7 @@ def display_live_video():
             bytearray(buffer) + b"\r\n\r\n"
         )
 
+
 # Route for displaying video
 @Edit_blueprint.route("/video_feed")
 def video_feed():
@@ -62,6 +64,7 @@ def video_feed():
         display_live_video(),
         mimetype="multipart/x-mixed-replace;boundary=frame",
     )
+
 
 # Route for capturing image from video
 @Edit_blueprint.route("/capture", methods=["GET", "POST"])
@@ -91,7 +94,7 @@ def capture():
     Name = request.form.get("Name", "")
     gender = request.form.get("gender", "")
     Dept = request.form.get("Department", "")
-    
+
     try:
         ret, frame = cap.read(True)
         if not ret:
@@ -101,13 +104,14 @@ def capture():
         frame = cv2.flip(frame, 1)
         _, buffer = cv2.imencode(".jpg", frame)
         encoded_image = base64.b64encode(buffer).decode("utf-8")
-        
+
         with open(Config.image_data_file, "w") as file:
             json.dump({"base64_image": encoded_image}, file)
     except Exception as e:
         print(f"Error while capturing image: {e}")
 
     return redirect("Image")
+
 
 # Route to display captured image
 @Edit_blueprint.route("/Image", methods=["GET"])
@@ -154,7 +158,8 @@ def display_image():
 
             if image:
                 recent_image = image[0]
-                image_path = os.path.join(Config.upload_image_path[0], recent_image)
+                image_path = os.path.join(
+                    Config.upload_image_path[0], recent_image)
             else:
                 recent_image = None
                 image_path = ""
@@ -166,7 +171,10 @@ def display_image():
         return render_template("index.html", image_path=image_path)
     except Exception as e:
         print(f"Error while displaying image: {e}")
-        return render_template("index.html", image_path="")  # Show a default image or handle error
+        return render_template(
+            "index.html", image_path=""
+        )  # Show a default image or handle error
+
 
 @Edit_blueprint.route("/edit/<int:EmployeeCode>", methods=["POST", "GET"])
 def edit(EmployeeCode):
@@ -221,7 +229,9 @@ def edit(EmployeeCode):
                 if url.status_code == 200:
                     return redirect("/")
                 else:
-                    print(f"Error: Failed to update employee data with status code {url.status_code}")
+                    print(
+                        f"Error: Failed to update employee data with status code {url.status_code}"
+                    )
             except requests.exceptions.RequestException as e:
                 print(f"Request failed: {e}")
 
@@ -234,7 +244,9 @@ def edit(EmployeeCode):
             employee_data = response.json()
             return render_template("edit.html", employee_data=employee_data)
         else:
-            print(f"Error: Failed to retrieve employee data with status code {response.status_code}")
+            print(
+                f"Error: Failed to retrieve employee data with status code {response.status_code}"
+            )
             return f"Error {response.status_code}: Failed to retrieve employee data."
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")

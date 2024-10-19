@@ -13,6 +13,7 @@ from API.utils import init_logging_config
 
 init_logging_config()
 
+
 def test_vector_search():
     """
     Test that the vector_search function returns the correct result.

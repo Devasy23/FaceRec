@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import os
+
 import numpy as np
 from keras.models import load_model
 from keras.preprocessing import image
 from sklearn.metrics.pairwise import euclidean_distances
+
 
 # Function to load and preprocess images
 def load_and_preprocess_image(img_path, target_size=(160, 160)):
@@ -17,6 +19,7 @@ def load_and_preprocess_image(img_path, target_size=(160, 160)):
     except Exception as e:
         print(f"Error loading image {img_path}: {e}")
         return None
+
 
 # Function to generate embeddings
 def generate_embeddings(model, dataset_path):
@@ -41,6 +44,7 @@ def generate_embeddings(model, dataset_path):
     labels = np.array(labels)
     return embeddings, labels
 
+
 # Function to calculate intra-cluster distances
 def calculate_intra_cluster_distances(embeddings, labels):
     unique_labels = np.unique(labels)
@@ -58,6 +62,7 @@ def calculate_intra_cluster_distances(embeddings, labels):
         distances.append(max_distance)
 
     return np.array(distances)
+
 
 # Load the pre-trained FaceNet model
 model_path = "facenet_model.h5"

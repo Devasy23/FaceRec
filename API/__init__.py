@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import uvicorn
 import logging
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 
 from API import route
@@ -15,6 +16,7 @@ Fastapp = FastAPI()
 # API Router
 Fastapp.include_router(route.router)
 
+
 @Fastapp.get("/")
 def read_root():
     try:
@@ -22,6 +24,7 @@ def read_root():
     except Exception as e:
         logger.error(f"Error in root endpoint: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
 # Function to run FastAPI server
 def run_fastapi_app():

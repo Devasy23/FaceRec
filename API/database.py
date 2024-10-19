@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from datetime import datetime
 import logging
+from datetime import datetime
+
 from pymongo import MongoClient, errors
 
 # Initialize logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class Database:
     def __init__(self, uri="mongodb://localhost:27017/", db_name="ImageDB"):
@@ -148,5 +150,6 @@ class Database:
             result_arr = [i for i in result]
             return result_arr
         except errors.PyMongoError as e:
-            logger.error(f"Error performing vector search in {collection}: {e}")
+            logger.error(
+                f"Error performing vector search in {collection}: {e}")
             return []

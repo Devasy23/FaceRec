@@ -22,6 +22,7 @@ try:
 except Exception as e:
     print(f"Error registering blueprints: {e}")
 
+
 # Function to run the server of Flask
 def run_flask():
     try:

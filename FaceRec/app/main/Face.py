@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import os
 
 import cv2
@@ -9,7 +10,6 @@ import requests
 from flask import Blueprint
 from flask import Response as flask_response
 from flask import redirect, render_template, request
-import logging
 
 from FaceRec.config import Config
 
@@ -98,7 +98,9 @@ def recognize():
         # Capture the image file for recognition
         with open("captured_image.jpg", "rb") as img_file:
             files = {"image": (img_file, "image/jpeg")}
-            fastapi_url = "http://127.0.0.1:8000/recognize_face"  # Replace with your FastAPI URL
+            fastapi_url = (
+                "http://127.0.0.1:8000/recognize_face"  # Replace with your FastAPI URL
+            )
             response = requests.post(fastapi_url, files=files)
             response.raise_for_status()  # Raise an error for bad responses
             logger.info("Recognition request successful.")
@@ -106,8 +108,12 @@ def recognize():
 
     except requests.exceptions.RequestException as e:
         logger.error(f"Recognition request failed: {e}")
-        return render_template("recognition.html", response_text="Recognition failed. Please try again.")
+        return render_template(
+            "recognition.html", response_text="Recognition failed. Please try again."
+        )
 
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}")
-        return render_template("recognition.html", response_text="An unexpected error occurred.")
+        return render_template(
+            "recognition.html", response_text="An unexpected error occurred."
+        )

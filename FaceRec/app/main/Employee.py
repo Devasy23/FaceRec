@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import os
 
 import cv2
 import requests
 from flask import Blueprint, jsonify, redirect, render_template, request
-import logging
 
 from FaceRec.config import Config
 
@@ -47,7 +47,9 @@ def display_information():
         logger.info("Employee data retrieved successfully.")
     except requests.exceptions.RequestException as e:
         logger.error(f"Request failed: {e}")
-        employees = []  # Handle the error gracefully by setting employees to an empty list
+        employees = (
+            []
+        )  # Handle the error gracefully by setting employees to an empty list
     return render_template("table.html", employees=employees)
 
 
@@ -74,7 +76,7 @@ def submit_form():
             return jsonify({"message": "No file part"}), 400
         file = request.files["File"]
         allowed_extensions = {"png", "jpg", "jpeg"}
-        if file and file.filename.split('.')[-1].lower() not in allowed_extensions:
+        if file and file.filename.split(".")[-1].lower() not in allowed_extensions:
             return jsonify({"message": "File extension is not valid"}), 400
 
         image_data = file.read()
@@ -94,7 +96,9 @@ def submit_form():
         }
 
         # Send request to FastAPI
-        response = requests.post("http://127.0.0.1:8000/create_new_faceEntry", json=payload)
+        response = requests.post(
+            "http://127.0.0.1:8000/create_new_faceEntry", json=payload
+        )
         response.raise_for_status()  # Raise an error for bad responses
         logger.info("Employee record created successfully.")
 
@@ -116,7 +120,8 @@ def delete(EmployeeCode):
         return jsonify({"message": "Employee code should be an integer"}), 400
 
     try:
-        response = requests.delete(f"http://127.0.0.1:8000/delete/{EmployeeCode}")
+        response = requests.delete(
+            f"http://127.0.0.1:8000/delete/{EmployeeCode}")
         response.raise_for_status()  # Raise an error for bad responses
         logger.info(f"Employee {EmployeeCode} deleted successfully.")
     except requests.exceptions.RequestException as e:
@@ -157,7 +162,9 @@ def update_employee(EmployeeCode):
             "Department": Department,
         }
 
-        response = requests.put(f"http://127.0.0.1:8000/update/{EmployeeCode}", json=payload)
+        response = requests.put(
+            f"http://127.0.0.1:8000/update/{EmployeeCode}", json=payload
+        )
         response.raise_for_status()  # Raise an error for bad responses
         logger.info(f"Employee {EmployeeCode} updated successfully.")
 

@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
+
 from API.route import router
 from API.utils import init_logging_config
 
@@ -14,9 +15,11 @@ init_logging_config()
 
 client = TestClient(router)
 
+
 # Exception handling utility function
 def log_exception(message: str):
     logging.error(message)
+
 
 @pytest.mark.run(order=1)
 def test_register_face1():
@@ -47,7 +50,8 @@ def test_register_face1():
             "API.database.Database.find_one_and_delete", mock_find_one_and_delete
         ):
             with open("./test-faces/devansh.jpg", "rb") as image_file:
-                encoded_string1 = base64.b64encode(image_file.read()).decode("utf-8")
+                encoded_string1 = base64.b64encode(
+                    image_file.read()).decode("utf-8")
 
             response1 = client.post(
                 "/create_new_faceEntry",
@@ -66,6 +70,7 @@ def test_register_face1():
     except Exception as e:
         log_exception(f"Error in test_register_face1: {e}")
         pytest.fail(f"Test failed due to exception: {e}")
+
 
 @pytest.mark.run(order=2)
 def test_register_face2():
@@ -96,7 +101,8 @@ def test_register_face2():
             "API.database.Database.find_one_and_delete", mock_find_one_and_delete
         ):
             with open("./test-faces/devansh.jpg", "rb") as image_file:
-                encoded_string2 = base64.b64encode(image_file.read()).decode("utf-8")
+                encoded_string2 = base64.b64encode(
+                    image_file.read()).decode("utf-8")
 
             response2 = client.post(
                 "/create_new_faceEntry",
@@ -115,6 +121,7 @@ def test_register_face2():
     except Exception as e:
         log_exception(f"Error in test_register_face2: {e}")
         pytest.fail(f"Test failed due to exception: {e}")
+
 
 @pytest.mark.run(order=3)
 def test_get_all_faces_after_registration():
@@ -141,6 +148,7 @@ def test_get_all_faces_after_registration():
     except Exception as e:
         log_exception(f"Error in test_get_all_faces_after_registration: {e}")
         pytest.fail(f"Test failed due to exception: {e}")
+
 
 @pytest.mark.run(order=4)
 def test_update_face():
@@ -171,7 +179,8 @@ def test_update_face():
             "API.database.Database.find_one_and_delete", mock_find_one_and_delete
         ):
             with open("./test-faces/devansh.jpg", "rb") as image_file:
-                encoded_string2 = base64.b64encode(image_file.read()).decode("utf-8")
+                encoded_string2 = base64.b64encode(
+                    image_file.read()).decode("utf-8")
 
             response = client.put(
                 "/update/1",
@@ -188,6 +197,7 @@ def test_update_face():
         log_exception(f"Error in test_update_face: {e}")
         pytest.fail(f"Test failed due to exception: {e}")
 
+
 @pytest.mark.run(order=5)
 def test_delete_face():
     """
@@ -200,6 +210,7 @@ def test_delete_face():
     except Exception as e:
         log_exception(f"Error in test_delete_face: {e}")
         pytest.fail(f"Test failed due to exception: {e}")
+
 
 @pytest.mark.run(order=6)
 def test_recognize_face_fail():
@@ -224,6 +235,7 @@ def test_recognize_face_fail():
     except Exception as e:
         log_exception(f"Error in test_recognize_face_fail: {e}")
         pytest.fail(f"Test failed due to exception: {e}")
+
 
 @pytest.mark.run(order=7)
 def test_recognize_face_success():
