@@ -134,6 +134,12 @@ Thanks to all the amazing people who have contributed to **FaceRec**! 💖
 
 [![Contributors](https://contrib.rocks/image?repo=Devasy23/FaceRec)](https://github.com/Devasy23/FaceRec/graphs/contributor)
 
+## 📄 Documentation
+
+For detailed API documentation, please refer to the [API Documentation](API_DOCUMENTATION.md) file.
+
+
 ## 📄 License
 
 This project is licensed under the **APACHE License** - see the [LICENSE](LICENSE) file for details.
+
