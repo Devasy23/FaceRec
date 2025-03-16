@@ -1,6 +1,6 @@
 deepface==0.0.92
 fastapi==0.115.0
-keras==2.15.0
+keras==3.9.0
 matplotlib==3.8.2
 numpy==2.1.2
 Pillow==10.4.0
